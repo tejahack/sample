@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    
+    <link rel="stylesheet" href="slider.css">
+</head>
+<body>
+    <h1>Image Gallery</h1>
+    <div class="slider">
+        <img class="active" src="img/01.png" alt="Image 1">
+        <img src="img/2.jpg" alt="Image 2">
+        <img src="img/download (1).jpeg" alt="Image 3">
+        <img src="img/download.jpeg" alt="Image 4">
+        <img src="img/giet-polytechnic-college-east-godavari-colleges-029wzz11wu.avif" alt="Image 5">
+        <img src="img/giet.jpg" alt="Image 6">
+        <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+        <a class="next" onclick="changeSlide(1)">&#10095;</a>
+    </div>
+    <script>
+        let slideIndex = 0;
+        showSlides();
+
+        function showSlides() {
+            const slides = document.querySelectorAll('.slider img');
+            slides.forEach((slide, index) => {
+                slide.style.display = (index === slideIndex) ? 'block' : 'none';
+            });
+        }
+
+        function changeSlide(n) {
+            slideIndex += n;
+            const slides = document.querySelectorAll('.slider img');
+            if (slideIndex >= slides.length) { slideIndex = 0; }
+            if (slideIndex < 0) { slideIndex = slides.length - 1; }
+            showSlides();
+        }
+    </script>
+</body>
+</html>
