@@ -1,67 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>Webpage Design</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <title>Portfolio Website</title>
 </head>
-
 <body>
+    <header>
+        <a href="#" class="logo">TEJA</a>
 
-    <div class="main">
-        <div class="navbar">
-            <div class="icon">
-                <h2 class="logo">AI WORKS</h2>
-            </div>
-
-            <div class="menu">
-                <ul>
-                    <li><a href="index.html">HOME</a></li>
-                    <li><a href="index 1.html">ABOUT</a></li>
-                    <li><a href="gallery.html">GALLERY</a></li>
-                    <li><a href="pdfs.html">PDF'S</a></li>
-                    <li><a href="compiler.html">C COMPILER</a></li>
-                </ul>
-            </div>
-
-            <div class="search">
-                <input class="srch" type="search" name="" placeholder="Type To text">
-                <a href="#"> <button class="btn">Search</button></a>
-            </div>
-
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
         </div>
-        <div class="content">
-            <h1>Web Design & <br><span>Development</span> <br>Course</h1>
-            <p class="par">Elevate your online presence with our top-tier web designing services! At Pixio, we <br>specialize in crafting visually stunning, user-friendly websites tailored to your unique brand and
-                <br>goals. Our team of skilled designers and developers works collaboratively to bring your vision to life
-                <br>ensuring a seamless blend of aesthetics and functionality.</p>
-
-            <button class="cn"><a href="signup.html">JOIN US</a></button>
-
-                    <div class="icons">
-                    <a href="#">
-                        <ion-icon name="logo-facebook"></ion-icon>
-                    </a>
-                    <a href="https://www.instagram.com/blk_lvr_teja_143/">
-                        <ion-icon name="logo-instagram"></ion-icon>
-                    </a>
-                    <a href="#">
-                        <ion-icon name="logo-twitter"></ion-icon>
-                    </a>
-                    <a href="#">
-                        <ion-icon name="logo-google"></ion-icon>
-                    </a>
-                    <a href="#">
-                        <ion-icon name="logo-skype"></ion-icon>
-                    </a>
-                </div>
-
-            </div>
+        <nav>
+            <a href="index.html" class="active">Home</a>
+            <a href="index 1.html">About</a>
+            <a href="gallery.html">Gallery</a>
+            <a href="pdfs.html">Pdf's</a>
+            <a href="compiler.html">Compiler</a>
+            <a href="contact.html">Contact Us</a>
+        </nav>        
+    </header>
+      <section class="home">
+        <div class="home-img">
+            <img src="main.jpg" alt="">
         </div>
-    </div>
-    </div>
-    </div>
-    <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+        <div class="home-content">
+            <h1>Hi, It's <span>Teja</span></h1>
+            <h3 class="typing-text">I'm a <span id="typing"></span></h3>
+            <p>Elevate your online presence with our top-tier web designing services! At Teja, we specialize in crafting visually stunning, user-friendly websites tailored to your unique brand and goals. Our team of skilled designers and developers works collaboratively to bring your vision to life ensuring a seamless blend of aesthetics and functionality.</p>
+            <div class="social-icons">
+                <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#"><i class="fa-brands fa-github"></i></a>
+                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://www.instagram.com/_.mr._.blk/"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+            <a href="#" class="btn">Hire me</a>
+        </div>
+    </section>
+    <script src="script.js"></script>
 </body>
-
 </html>
