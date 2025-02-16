@@ -57,7 +57,7 @@ export default function BlogApp() {
       {/* Header */}
       <header className="bg-primary text-primary-foreground shadow-lg">
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">My Awesome Blog</h1>
+          <h1 className="text-2xl font-bold">TEJA'S BLOG</h1>
         </div>
       </header>
 
@@ -107,7 +107,7 @@ export default function BlogApp() {
       {/* Footer */}
       <footer className="bg-muted mt-8">
         <div className="container mx-auto px-4 py-6 text-center">
-          <p>&copy; 2023 My Awesome Blog. All rights reserved.</p>
+          <p>&copy; 2025 Teja's Blog. All rights reserved.</p>
         </div>
       </footer>
     </div>
