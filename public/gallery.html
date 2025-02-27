@@ -2,44 +2,75 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery</title>
-    
-    <link rel="stylesheet" href="slider.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery</title>
+    <link rel="stylesheet" href="slider.css" />
 </head>
+
 <body>
-    <div class="container">
-        <h2 class="logo">AI WORKS</h2>
-    <h1>Image Gallery</h1>
-    <div class="slider">
-        <img class="active" src="img/01.png" alt="Image 1">
-        <img src="img/2.jpg" alt="Image 2">
-        <img src="img/download (1).jpeg" alt="Image 3">
-        <img src="img/download.jpeg" alt="Image 4">
-        <img src="img/giet-polytechnic-college-east-godavari-colleges-029wzz11wu.avif" alt="Image 5">
-        <img src="img/giet.jpg" alt="Image 6">
-        <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
-        <a class="next" onclick="changeSlide(1)">&#10095;</a>
-    </div>
+    <section class="slider-container">
+        <div class="slider-images">
+            <div class="slider-img">
+                <img src="Img/1.png" alt="1" />
+                <h1>GIET</h1>
+                <div class="details">
+                    <h2>GIET</h2>
+                    <p>GIET</p>
+                </div>
+            </div>
+            <div class="slider-img">
+                <img src="Img/2.jpeg" alt="2" />
+                <h1>GIET</h1>
+                <div class="details">
+                    <h2>GIET</h2>
+                    <p>CAMPUS</p>
+                </div>
+            </div>
+            <div class="slider-img">
+                <img src="img/3.jpeg" alt="3" />
+                <h1>GIET</h1>
+                <div class="details">
+                    <h2>GIET</h2>
+                    <p>ENTRANCE</p>
+                </div>
+            </div>
+            <div class="slider-img active">
+                <img src="Img/4.avif" alt="4" />
+                <h1>GIET</h1>
+                <div class="details">
+                    <h2>GIET</h2>
+                    <p>DIPLOMA BLOCK</p>
+                </div>
+            </div>
+            <div class="slider-img">
+                <img src="Img/5.jpg" alt="5" />
+                <h1>GIET</h1>
+                <div class="details">
+                    <h2>GIET</h2>
+                    <p>AUDITORIUM</p>
+                </div>
+            </div>
+            <div class="slider-img">
+                <img src="Img/6.jpg" alt="6" />
+                <h1>GIET</h1>
+                <div class="details">
+                    <h2>GIET</h2>
+                    <p>MYTHRI</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <script src="jQuery.js"></script>
     <script>
-        let slideIndex = 0;
-        showSlides();
-
-        function showSlides() {
-            const slides = document.querySelectorAll('.slider img');
-            slides.forEach((slide, index) => {
-                slide.style.display = (index === slideIndex) ? 'block' : 'none';
+        jQuery(document).ready(function($) {
+            $(".slider-img").on("click", function() {
+                $(".slider-img").removeClass("active");
+                $(this).addClass("active");
             });
-        }
-
-        function changeSlide(n) {
-            slideIndex += n;
-            const slides = document.querySelectorAll('.slider img');
-            if (slideIndex >= slides.length) { slideIndex = 0; }
-            if (slideIndex < 0) { slideIndex = slides.length - 1; }
-            showSlides();
-        }
+        });
     </script>
 </body>
+
 </html>
