@@ -1,47 +1,120 @@
-/* Slider Container */
-.slider {
-    position: relative;
-    max-width: 80%; /* Set a fixed width for the slider */
-    margin: auto;
-    overflow: hidden;
+@import url("https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap");
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: "Jost", sans-serif;
 }
 
-/* Images */
-.slider img {
-    width: 50%; /* Updated to set image width to half of the slider */
-    display: block; /* Set images to block to allow margin auto */
-    margin: 0 auto; /* Center images horizontally */
-    height: auto;
-    /* display: none; */ /* Hide images by default - this line is redundant and will be removed */
+.slider-container {
+    width: 100%;
+    height: 100vh;
+    background-image: url('Images/bg-img.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Active Image */
-.slider img.active {
-    display: block; /* Show active image */
+.slider-images {
+    display: flex;
+    align-items: center;
+    gap: 21px;
 }
 
-/* Navigation Buttons */
-.prev, .next {
+.slider-images img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.slider-img {
+    width: 110px;
+    border-radius: 6px;
     cursor: pointer;
+    position: relative;
+    transition: 0.7s ease;
+}
+
+.slider-images .slider-img:first-child,
+.slider-images .slider-img:last-child {
+    height: 480px;
+}
+
+.slider-images .slider-img:nth-child(2),
+.slider-images .slider-img:nth-child(6) {
+    height: 560px;
+}
+
+.slider-images .slider-img:nth-child(3),
+.slider-images .slider-img:nth-child(4),
+.slider-images .slider-img:nth-child(5) {
+    height: 665px;
+}
+
+h1 {
+    font-family: "Jost", sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
+    color: #fff;
     position: absolute;
     top: 50%;
-    width: auto;
-    padding: 16px;
-    background-color: rgba(0, 0, 0, 0.5); /* Add background color for visibility */
-    border-radius: 3px; /* Add border radius for a smoother look */
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-    transition: 0.6s ease;
-    border-radius: 0 3px 3px 0;
-    user-select: none;
+    left: -10%;
+    transform: rotate(270deg);
+    transition: 0.7s ease;
 }
 
-.next {
-    right: 0;
-    border-radius: 3px 0 0 3px;
+.details {
+    position: absolute;
+    bottom: 43px;
+    left: 43px;
 }
 
-.prev:hover, .next:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+.details h2 {
+    font-family: "Jost", sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    text-align: left;
+    line-height: 44px;
+    text-align: left;
+    color: #fff;
+    text-transform: uppercase;
+    transition: 0.7s ease;
+    display: none;
 }
+
+.details p {
+    font-family: "Jost", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: left;
+    line-height: 33px;
+    text-align: left;
+    color: #fff;
+    text-transform: uppercase;
+    transition: 0.7s ease;
+    display: none;
+}
+
+.slider-img.active {
+    width: 766px !important;
+    height: 750px !important;
+}
+
+.slider-img.active h1 {
+    display: none;
+}
+
+.slider-img.active .details p,
+.slider-img.active .details h2 {
+    display: block;
+}
+
+body {
+    background-color: rgba(0, 0, 0, 0.938);
+  }
