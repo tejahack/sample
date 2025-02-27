@@ -179,7 +179,7 @@ span {
 .btn {
     display: inline-block;
     padding: 1rem 2.8rem;
-    background-color: black;
+    background-color: rgba(0, 0, 0, 0);
     border-radius: 4rem;
     font-size: 1.6rem;
     color: #b74b4b;
@@ -193,7 +193,7 @@ span {
 .btn:hover {
     transform: scale3d(1.03);
     background-color: #b74b4b;
-    color: black;
+    color: rgb(0, 0, 0);
     box-shadow: 0 0 25px #b74b4b;
 }
 
