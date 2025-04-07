@@ -1,74 +1,61 @@
-/* downloads.css */
-
-/* Reset some default styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* style 1.css */
 
 body {
+    margin: 0;
+    padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f7f9fc;
-    color: #000000;
-    min-height: 100vh;
+    background: linear-gradient(135deg, #f9f9f9, #e0f7fa);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem;
+    min-height: 100vh;
+    color: #333;
 }
 
 h1 {
+    margin-top: 40px;
     font-size: 2.5rem;
     color: #000000;
-    margin-bottom: 2rem;
-    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 ul {
     list-style: none;
     padding: 0;
-    width: 100%;
-    max-width: 600px;
-}
-
-li {
-    background: #ffffff;
-    margin-bottom: 1rem;
-    padding: 1rem 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-li:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    margin: 30px 0;
+    width: 90%;
+    max-width: 500px;
 }
 
 a {
+    display: block;
+    background-color: #ffffff;
+    color: #0099ff;
     text-decoration: none;
-    color: #1a73e8;
-    font-size: 1.1rem;
-    display: inline-block;
-    transition: color 0.2s;
+    padding: 15px 20px;
+    margin: 10px 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-align: center;
 }
 
 a:hover {
-    color: #0c47a1;
+    background-color: #0076fd;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
-/* Back to Home link */
-body > a:last-of-type {
-    margin-top: 2rem;
-    padding: 0.8rem 1.5rem;
-    background-color: #1a73e8;
-    color: #fff;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background-color 0.3s;
-}
+/* Responsive design */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem;
+    }
 
-body > a:last-of-type:hover {
-    background-color: #1558b0;
+    a {
+        font-size: 1rem;
+        padding: 12px 16px;
+    }
 }
