@@ -1,97 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Secure Login</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <title>Secure Login</title>
   <style>
-    body {
-      background: linear-gradient(135deg, #2c3e50, #3498db);
-      color: white;
-      font-family: sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+    * {
+      box-sizing: border-box;
     }
 
-    .login-box {
-      background: white;
-      color: black;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+      perspective: 1000px;
+    }
+
+    .card-container {
       width: 300px;
+      height: 220px;
+      position: relative;
+      transition: transform 1s;
+      transform-style: preserve-3d;
+    }
+
+    .flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      backface-visibility: hidden;
+    }
+
+    .front, .back {
+      background: white;
+      padding: 20px;
+    }
+
+    .front {
+      z-index: 2;
+    }
+
+    .back {
+      transform: rotateY(180deg);
       text-align: center;
     }
 
-    input {
-      width: 90%;
+    input[type="password"] {
+      width: 100%;
       padding: 10px;
       margin-top: 15px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
 
+    .toggle {
+      font-size: 0.9em;
+      cursor: pointer;
+      color: #007BFF;
+      text-align: right;
+      display: block;
+    }
+
     button {
       margin-top: 15px;
-      padding: 10px 20px;
-      background: #3498db;
+      padding: 10px;
+      width: 100%;
+      background: #007BFF;
       color: white;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #0056b3;
     }
 
     .error {
       color: red;
+      font-size: 0.9em;
       margin-top: 10px;
+      height: 20px;
     }
 
-    .toggle {
-      font-size: 0.9em;
-      cursor: pointer;
-      margin-top: 5px;
-      color: #3498db;
+    .shake {
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0px); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0px); }
     }
   </style>
 </head>
 <body>
 
-  <div class="login-box">
-    <h2>Enter Password</h2>
-    <input type="password" id="pw">
-    <div class="toggle" onclick="togglePW()">Show</div>
-    <button onclick="secureLogin()">Login</button>
-    <div class="error" id="err"></div>
+  <div class="card-container" id="cardContainer">
+    <div class="card front" id="loginCard">
+      <h2>Enter Password</h2>
+      <input type="password" id="passwordInput" placeholder="Password">
+      <span class="toggle" onclick="togglePassword()">Show</span>
+      <button onclick="checkPassword()">Login</button>
+      <div class="error" id="errorMessage"></div>
+    </div>
+    <div class="card back">
+      <h2>Access Granted!</h2>
+      <p>Redirecting to content...</p>
+    </div>
   </div>
 
   <script>
-    const secretPassword = "Mteja@1437";
-    const key = CryptoJS.enc.Utf8.parse("MySecureKey@2025!!"); // 16-byte key
-    const iv = CryptoJS.enc.Utf8.parse("MyInitVector2025");   // 16-byte IV
+    const correctPassword = "Mteja@1437"; // 🔐 Set your password here
+    const input = document.getElementById("passwordInput");
+    const card = document.getElementById("cardContainer");
+    const error = document.getElementById("errorMessage");
 
-    function secureLogin() {
-      const input = document.getElementById("pw").value;
-      const err = document.getElementById("err");
-
-      if (input === secretPassword) {
-        const token = CryptoJS.AES.encrypt("access_granted", key, { iv }).toString();
-        const expiry = Date.now() + 10 * 60 * 1000; // expires in 10 minutes
-        sessionStorage.setItem("auth", token);
-        sessionStorage.setItem("expires", expiry);
-        location.href = "secret.html";
+    function checkPassword() {
+      if (input.value === correctPassword) {
+        error.textContent = "";
+        sessionStorage.setItem("authenticated", "true"); // ✅ Access flag
+        card.classList.add("flipped");
+        setTimeout(() => {
+          window.location.href = "secret.html"; // 🔐 Only accessible with flag
+        }, 1200);
       } else {
-        err.textContent = "Incorrect password!";
+        error.textContent = "Incorrect password!";
+        card.classList.add("shake");
+        setTimeout(() => card.classList.remove("shake"), 400);
       }
     }
 
-    function togglePW() {
-      const input = document.getElementById("pw");
-      input.type = input.type === "password" ? "text" : "password";
-      event.target.textContent = input.type === "password" ? "Show" : "Hide";
+    function togglePassword() {
+      const toggle = event.target;
+      if (input.type === "password") {
+        input.type = "text";
+        toggle.textContent = "Hide";
+      } else {
+        input.type = "password";
+        toggle.textContent = "Show";
+      }
     }
   </script>
 
