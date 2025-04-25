@@ -125,18 +125,18 @@
   </div>
 
   <script>
-    const correctPassword = "Mteja@1437"; // 🔐 Set your password here
+    const corePass = "Mteja@1437";
     const input = document.getElementById("passwordInput");
     const card = document.getElementById("cardContainer");
     const error = document.getElementById("errorMessage");
 
     function checkPassword() {
-      if (input.value === correctPassword) {
+      if (input.value === corePass) {
         error.textContent = "";
-        sessionStorage.setItem("authenticated", "true"); // ✅ Access flag
+        sessionStorage.setItem("authenticated", "true"); 
         card.classList.add("flipped");
         setTimeout(() => {
-          window.location.href = "secret.html"; // 🔐 Only accessible with flag
+          window.location.href = "secret.html"; 
         }, 1200);
       } else {
         error.textContent = "Incorrect password!";
