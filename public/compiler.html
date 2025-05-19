@@ -406,13 +406,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button class="mobile-run-button run">
           Run
         </button>
-        <div id="editor">// Online C compiler to run C program online
+        <div id="editor">// Online C compier to run C program online
 #include &lt;stdio.h&gt;
 int main() {
-    // Write C code here
-    printf("Try C Compiler Online");
+    int num, originalNum, reversedNum = 0, remainder, step = 1;
+
+    // Taking input from user
+    printf("Enter a number: ");
+    scanf("%d", &num);
+
+    originalNum = num;  // Store the original number
+
+    // Step-by-step division and reversal process
+    printf("\nStep-by-step division process:\n");
+    while (num != 0) {
+        remainder = num % 10;                     // Extract last digit
+        reversedNum = reversedNum * 10 + remainder; // Build reversed number
+        printf("Step %d: Remainder = %d, Reversed = %d\n", step, remainder, reversedNum);
+        
+        num /= 10;  // Remove the last digit
+        step++;
+    }
+
+    // Check if the number is a palindrome
+    printf("\nOriginal Number: %d\n", originalNum);
+    printf("Reversed Number: %d\n", reversedNum);
+
+    if (originalNum == reversedNum) {
+        printf("\nThe number is a palindrome.\n");
+    } else {
+        printf("\nThe number is not a palindrome.\n");
+    }
 
     return 0;
+}
 }</div>
       </div>
 
