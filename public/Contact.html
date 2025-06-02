@@ -1,40 +1,120 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-          <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-WM2XTFPG');</script>
-<!-- End Google Tag Manager -->
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SJ1E76PTHZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+<html lang="en">
 
-  gtag('config', 'G-SJ1E76PTHZ');
-    <meta charset="utf-8">
-    <title>Contact Us</title>
-    <header style="text-align:center;font-size:250%;color:#5e544c;">
-      Contact Us
-    </header>
-  </head>
-  
-  <body style="background-color:#f1ede5;font-family:DK Lemon Yellow Sun;font-size:130%;text-align:center;" background="bg.jpg">
-      <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WM2XTFPG"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-    <p style="text-align:center" width:"75%">
-      <label for=""><a href="index.html">Home</a> / <a href="About.html">About Us</a></label>
-    </p>
-    <hr>
-    <address class="" style="text-align:center" width:"75%">
-      <p><b style="font-size:150%">Get in Touch</b><br><a href="mailto:molletiteja143@gmail.com">Send an Email</a><br><a href="tel:+919849787576">Give us a call</a></p>
-    </address>
-  </body>
-    <footer style="color:#5e544c;"><hr><b>© 2025 Teja. </b>  All Rights Reserved..</footer>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background-color: #ffffff;
+            color: #000000;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .info a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        input,
+        textarea {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 10px;
+            font-size: 1rem;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #004d99;
+        }
+        
+        .message {
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Contact Me</h1>
+
+        <div class="info">
+            <p>Email: <a href="mailto:you@example.com">you@example.com</a></p>
+            <p>Phone: <a href="tel:+15551234567">+1 (555) 123-4567</a></p>
+        </div>
+
+        <form id="contactForm">
+            <input type="text" name="user_name" placeholder="Your Name" required />
+            <input type="email" name="user_email" placeholder="Your Email" required />
+            <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+            <button type="submit">Send</button>
+            <div class="message" id="formMessage"></div>
+        </form>
+    </div>
+
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script>
+        (function() {
+            emailjs.init("9b7m3xeOv027u8o-e"); // Replace with your EmailJS public key
+        })();
+
+        const form = document.getElementById('contactForm');
+        const msg = document.getElementById('formMessage');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            emailjs.sendForm('service_logm4nq', 'template_q7ou8mp', this)
+                .then(() => {
+                    msg.textContent = "Message sent successfully!";
+                    msg.style.color = "green";
+                    form.reset();
+                }, (error) => {
+                    msg.textContent = "Failed to send message. Please try again.";
+                    msg.style.color = "red";
+                    console.error('EmailJS Error:', error);
+                });
+        });
+    </script>
+
+</body>
+
 </html>
