@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&display=swap');
+body{
+   
+    justify-content: center;
+    display: flex;
+    
+}
+h1{
+    border-style: dashed;
+    background-color: rgb(172, 63, 36);
+    border-radius: 10px;
+    text-align: center;
+    font-family: "Bona Nova SC", serif;
+    border-width: 90%;
+    border: 3px;
+}
+.full{
+     background-color: rgb(247, 129, 100);
+      width: 550px;
+    height: 600px;
+    border-style: solid;
+    border-radius: 10px;
+}
+label{
+    display: block;
+}
+a{
+    display: block;
+}
+h3{
+    text-align: center;
+}
