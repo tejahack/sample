@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,34 +12,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Custom styles */
-        
         body {
             font-family: 'Inter', sans-serif;
         }
         /* Simple scrollbar styling */
-        
-         ::-webkit-scrollbar {
+        ::-webkit-scrollbar {
             width: 8px;
         }
-        
-         ::-webkit-scrollbar-track {
-            background: #1f2937;
-            /* gray-800 */
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
         }
-        
-         ::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            /* gray-600 */
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
             border-radius: 4px;
         }
-        
-         ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
-            /* gray-500 */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
         }
     </style>
 </head>
-
 <body class="h-full bg-gray-900 text-white">
 
     <div class="flex h-screen w-full font-sans">
@@ -51,7 +41,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
                 <h1 class="text-2xl font-bold tracking-tighter">AI Chat Hub</h1>
             </div>
-
+            
             <div class="relative" id="model-selector-container">
                 <button id="model-selector-button" class="w-full flex justify-between items-center bg-gray-800 p-3 rounded-lg text-left hover:bg-gray-700 transition-colors duration-200">
                     <div>
@@ -65,10 +55,10 @@
                     <!-- Model options will be injected by JS -->
                 </div>
             </div>
-
+            
             <div class="mt-auto text-xs text-gray-500">
                 <p>&copy; 2025 AI Model Interface. All rights reserved.</p>
-                <p class="mt-1">Built with Teja</p>
+                <p class="mt-1">Built with HTML, CSS & JS.</p>
             </div>
         </aside>
 
@@ -140,7 +130,7 @@
                 chatHistory.forEach(msg => {
                     const messageEl = document.createElement('div');
                     messageEl.classList.add('flex', 'items-start', 'gap-4');
-
+                    
                     let content = '';
                     if (msg.role === 'user') {
                         messageEl.classList.add('justify-end');
@@ -171,7 +161,7 @@
                 // Scroll to the bottom
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             };
-
+            
             /**
              * Updates the UI based on the loading state.
              */
@@ -204,10 +194,10 @@
                         <span>Online</span>
                     `;
                     const loadingBubble = document.getElementById('loading-bubble');
-                    if (loadingBubble) loadingBubble.remove();
+                    if(loadingBubble) loadingBubble.remove();
                 }
             };
-
+            
             /**
              * Renders the model selector dropdown options.
              */
@@ -228,7 +218,7 @@
                     modelSelectorDropdown.appendChild(optionEl);
                 });
             };
-
+            
             /**
              * Updates all UI components that depend on the selected model.
              */
@@ -241,17 +231,12 @@
 
             // --- EVENT HANDLERS ---
 
-            const handleSendMessage = async() => {
+            const handleSendMessage = async () => {
                 const currentInput = chatInput.value.trim();
                 if (currentInput === '' || isLoading) return;
 
                 // Add user message to history and render
-                chatHistory.push({
-                    role: 'user',
-                    parts: [{
-                        text: currentInput
-                    }]
-                });
+                chatHistory.push({ role: 'user', parts: [{ text: currentInput }] });
                 chatInput.value = '';
                 renderChat();
 
@@ -264,23 +249,19 @@
                         role: msg.role === 'assistant' ? 'model' : 'user',
                         parts: msg.parts,
                     }));
-
-                    const payload = {
-                        contents: conversation
-                    };
+                    
+                    const payload = { contents: conversation };
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODELS[selectedModel].endpoint}:generateContent?key=`;
 
                     const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
 
                     if (!response.ok) {
                         const errorData = await response.json();
-                        throw new Error(errorData.error ? .message || 'An unknown API error occurred.');
+                        throw new Error(errorData.error?.message || 'An unknown API error occurred.');
                     }
 
                     const result = await response.json();
@@ -290,19 +271,14 @@
                         throw new Error('Received an invalid response from the model.');
                     }
                 } catch (error) {
-                    chatHistory.push({
-                        role: 'assistant',
-                        parts: [{
-                            text: `**Error:** ${error.message}`
-                        }]
-                    });
+                    chatHistory.push({ role: 'assistant', parts: [{ text: `**Error:** ${error.message}` }] });
                 } finally {
                     isLoading = false;
                     updateLoadingState(); // Remove loading bubble
                     renderChat(); // Render final response
                 }
             };
-
+            
             const handleModelChange = (modelId) => {
                 selectedModel = modelId;
                 isModelSelectorOpen = false;
@@ -310,12 +286,7 @@
                 modelSelectorChevron.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>'; // Chevron Down
                 updateUIForModel();
                 // Reset chat with a welcome message
-                chatHistory = [{
-                    role: 'assistant',
-                    parts: [{
-                        text: `Welcome! I'm now set to **${MODELS[selectedModel].name}**. How can I help you?`
-                    }]
-                }];
+                chatHistory = [{ role: 'assistant', parts: [{ text: `Welcome! I'm now set to **${MODELS[selectedModel].name}**. How can I help you?` }] }];
                 renderChat();
             };
 
@@ -343,12 +314,7 @@
             const initializeApp = () => {
                 updateUIForModel();
                 renderModelSelector();
-                chatHistory = [{
-                    role: 'assistant',
-                    parts: [{
-                        text: `Welcome! I'm currently set to **${MODELS[selectedModel].name}**. How can I help you?`
-                    }]
-                }];
+                chatHistory = [{ role: 'assistant', parts: [{ text: `Welcome! I'm currently set to **${MODELS[selectedModel].name}**. How can I help you?` }] }];
                 renderChat();
             };
 
@@ -356,5 +322,4 @@
         });
     </script>
 </body>
-
 </html>
