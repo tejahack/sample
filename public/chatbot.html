@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Code Assistant</title>
+    <title>AI Code Assistant (Offline)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -173,7 +173,7 @@
             loadingIndicator.classList.remove('hidden');
 
             try {
-                // Call the AI
+                // Call the local "AI"
                 const aiResponse = await getAiResponse(prompt);
                 // Display AI's message
                 displayMessage(aiResponse, 'bot');
@@ -233,47 +233,84 @@
         }
 
         async function getAiResponse(prompt) {
-            // This is the core function to get a response from the free Gemini Flash model.
-            // It sends the user's prompt to the model via a Google API endpoint.
-            // The API key is left empty, as the environment will handle authentication for the free tier.
-            const apiKey = ""; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            // This is a mock function to simulate an AI response without an API call.
+            // It provides pre-canned answers based on keywords in the prompt.
+            return new Promise(resolve => {
+                setTimeout(() => { // Simulate network delay
+                    const lowerCasePrompt = prompt.toLowerCase();
+                    let response = "I'm sorry, I can only respond to a few pre-programmed questions in this offline mode. Try asking about 'python web server', 'javascript array', or 'css center div'.";
 
-            const payload = {
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            };
+                    if (lowerCasePrompt.includes('python') && lowerCasePrompt.includes('web server')) {
+                        response = `Of course! Here is a simple Python web server using the built-in \`http.server\` module.
 
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+\`\`\`python
+import http.server
+import socketserver
+
+PORT = 8000
+
+Handler = http.server.SimpleHTTPRequestHandler
+
+with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    print("serving at port", PORT)
+    httpd.serve_forever()
+\`\`\`
+
+You can run this code and then visit \`http://localhost:8000\` in your browser.`;
+                    } else if (lowerCasePrompt.includes('javascript') && lowerCasePrompt.includes('array')) {
+                        response = `In JavaScript, you can declare an array like this:
+
+\`\`\`javascript
+// An array of strings
+let fruits = ["Apple", "Banana", "Orange"];
+
+// An array of numbers
+let numbers = [1, 2, 3, 4, 5];
+
+// You can access elements by their index (starting from 0)
+console.log(fruits[0]); // Outputs: "Apple"
+
+// You can add items using push()
+fruits.push("Mango");
+console.log(fruits); // Outputs: ["Apple", "Banana", "Orange", "Mango"]
+\`\`\`
+
+There are many other array methods available, like \`map\`, \`filter\`, and \`reduce\`.`;
+                    } else if (lowerCasePrompt.includes('css') && (lowerCasePrompt.includes('center') || lowerCasePrompt.includes('centre')) && lowerCasePrompt.includes('div')) {
+                        response = `A very common and effective way to center a \`div\` with CSS is by using Flexbox.
+
+\`\`\`html
+<div class="parent-container">
+  <div class="child-div">
+    I am centered!
+  </div>
+</div>
+\`\`\`
+
+\`\`\`css
+.parent-container {
+  display: flex;
+  justify-content: center; /* Horizontally centers */
+  align-items: center;   /* Vertically centers */
+  height: 100vh; /* Or any height */
+  border: 1px solid black;
+}
+
+.child-div {
+  padding: 20px;
+  background-color: lightblue;
+}
+\`\`\`
+
+This will center the \`child-div\` both horizontally and vertically within the \`parent-container\`.`;
+                    }
+                    
+                    resolve(response);
+                }, 1000); // 1 second delay
             });
-
-            if (!response.ok) {
-                const errorBody = await response.json();
-                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody.error.message}`);
-            }
-
-            const result = await response.json();
-            
-            // Navigate through the response structure to find the generated text
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                return result.candidates[0].content.parts[0].text;
-            } else {
-                // Handle cases where the response structure is unexpected
-                console.error("Unexpected API response structure:", result);
-                return "I'm sorry, I received an unusual response from the AI. I can't provide an answer right now.";
-            }
         }
 
     </script>
 </body>
 </html>
+
