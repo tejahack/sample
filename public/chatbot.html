@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Chat Hub</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple scrollbar styling */
+        
+         ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: #1f2937;
+            /* gray-800 */
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            /* gray-600 */
+            border-radius: 4px;
+        }
+        
+         ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+            /* gray-500 */
+        }
+    </style>
+</head>
+
+<body class="h-full bg-gray-900 text-white">
+
+    <div class="flex h-screen w-full font-sans">
+        <!-- --- Sidebar for Model Selection --- -->
+        <aside class="w-full max-w-xs bg-gray-950 p-4 flex flex-col border-r border-gray-800">
+            <div class="flex items-center gap-2 mb-6">
+                <!-- CPU Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                <h1 class="text-2xl font-bold tracking-tighter">AI Chat Hub</h1>
+            </div>
+
+            <div class="relative" id="model-selector-container">
+                <button id="model-selector-button" class="w-full flex justify-between items-center bg-gray-800 p-3 rounded-lg text-left hover:bg-gray-700 transition-colors duration-200">
+                    <div>
+                        <span id="selected-model-name" class="block text-sm font-semibold"></span>
+                        <span class="block text-xs text-gray-400">Select a model</span>
+                    </div>
+                    <!-- Chevron Down/Up SVG -->
+                    <svg id="model-selector-chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div id="model-selector-dropdown" class="absolute hidden top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10">
+                    <!-- Model options will be injected by JS -->
+                </div>
+            </div>
+
+            <div class="mt-auto text-xs text-gray-500">
+                <p>&copy; 2025 AI Model Interface. All rights reserved.</p>
+                <p class="mt-1">Built with Teja</p>
+            </div>
+        </aside>
+
+        <!-- --- Main Chat Area --- -->
+        <main class="flex-1 flex flex-col bg-gray-900/80">
+            <!-- Chat Header -->
+            <header class="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-950/50 backdrop-blur-sm">
+                <h2 id="chat-header-title" class="text-xl font-semibold"></h2>
+                <div id="status-indicator" class="flex items-center gap-2 text-sm text-gray-400">
+                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                    <span>Online</span>
+                </div>
+            </header>
+
+            <!-- Chat Messages -->
+            <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Chat messages will be injected by JS -->
+            </div>
+
+            <!-- Input Bar -->
+            <div class="p-4 border-t border-gray-800 bg-gray-950">
+                <div class="relative">
+                    <textarea id="chat-input" placeholder="Message Gemini..." rows="1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 pr-12 resize-none focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                    <button id="send-button" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors">
+                        <!-- CornerDownLeft Icon SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MODEL CONFIGURATION ---
+            const MODELS = {
+                'gemini-2.0-flash': {
+                    name: 'Gemini 2.0 Flash',
+                    description: 'Google\'s fast and capable multimodal model.',
+                    endpoint: 'gemini-2.0-flash',
+                },
+            };
+
+            // --- STATE MANAGEMENT ---
+            let selectedModel = Object.keys(MODELS)[0];
+            let chatHistory = [];
+            let isLoading = false;
+            let isModelSelectorOpen = false;
+
+            // --- DOM ELEMENT REFERENCES ---
+            const chatContainer = document.getElementById('chat-container');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+            const statusIndicator = document.getElementById('status-indicator');
+            const chatHeaderTitle = document.getElementById('chat-header-title');
+            const modelSelectorButton = document.getElementById('model-selector-button');
+            const modelSelectorDropdown = document.getElementById('model-selector-dropdown');
+            const selectedModelName = document.getElementById('selected-model-name');
+            const modelSelectorChevron = document.getElementById('model-selector-chevron');
+
+
+            // --- RENDER FUNCTIONS (Replaces React's rendering) ---
+
+            /**
+             * Renders the entire chat history to the DOM.
+             */
+            const renderChat = () => {
+                chatContainer.innerHTML = ''; // Clear previous messages
+                chatHistory.forEach(msg => {
+                    const messageEl = document.createElement('div');
+                    messageEl.classList.add('flex', 'items-start', 'gap-4');
+
+                    let content = '';
+                    if (msg.role === 'user') {
+                        messageEl.classList.add('justify-end');
+                        content = `
+                            <div class="max-w-xl p-4 rounded-xl shadow-md bg-blue-600 rounded-br-none">
+                                <p class="whitespace-pre-wrap">${msg.parts[0].text}</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                        `;
+                    } else {
+                        // Bold formatting for assistant messages
+                        const formattedText = msg.parts[0].text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        content = `
+                            <div class="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"></path><rect x="4" y="12" width="16" height="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 12v-2a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2"></path></svg>
+                            </div>
+                            <div class="max-w-xl p-4 rounded-xl shadow-md bg-gray-800 rounded-bl-none">
+                                <p class="whitespace-pre-wrap">${formattedText}</p>
+                            </div>
+                        `;
+                    }
+                    messageEl.innerHTML = content;
+                    chatContainer.appendChild(messageEl);
+                });
+
+                // Scroll to the bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            };
+
+            /**
+             * Updates the UI based on the loading state.
+             */
+            const updateLoadingState = () => {
+                sendButton.disabled = isLoading;
+                chatInput.disabled = isLoading;
+
+                if (isLoading) {
+                    statusIndicator.innerHTML = `
+                        <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                        <span>Thinking...</span>
+                    `;
+                    // Add loading bubble
+                    const loadingEl = document.createElement('div');
+                    loadingEl.id = 'loading-bubble';
+                    loadingEl.classList.add('flex', 'items-start', 'gap-4');
+                    loadingEl.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                        </div>
+                        <div class="max-w-xl p-4 rounded-xl shadow-md bg-gray-800 rounded-bl-none flex items-center">
+                            <span>Generating response...</span>
+                        </div>
+                    `;
+                    chatContainer.appendChild(loadingEl);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                } else {
+                    statusIndicator.innerHTML = `
+                        <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                        <span>Online</span>
+                    `;
+                    const loadingBubble = document.getElementById('loading-bubble');
+                    if (loadingBubble) loadingBubble.remove();
+                }
+            };
+
+            /**
+             * Renders the model selector dropdown options.
+             */
+            const renderModelSelector = () => {
+                modelSelectorDropdown.innerHTML = '';
+                Object.keys(MODELS).forEach(modelId => {
+                    const model = MODELS[modelId];
+                    const optionEl = document.createElement('div');
+                    optionEl.classList.add('p-3', 'cursor-pointer', 'hover:bg-indigo-500/20');
+                    if (modelId === selectedModel) {
+                        optionEl.classList.add('bg-indigo-500/10');
+                    }
+                    optionEl.innerHTML = `
+                        <p class="font-semibold text-white">${model.name}</p>
+                        <p class="text-xs text-gray-400">${model.description}</p>
+                    `;
+                    optionEl.addEventListener('click', () => handleModelChange(modelId));
+                    modelSelectorDropdown.appendChild(optionEl);
+                });
+            };
+
+            /**
+             * Updates all UI components that depend on the selected model.
+             */
+            const updateUIForModel = () => {
+                const model = MODELS[selectedModel];
+                chatHeaderTitle.textContent = model.name;
+                selectedModelName.textContent = model.name;
+                chatInput.placeholder = `Message ${model.name}... (Enter to send)`;
+            };
+
+            // --- EVENT HANDLERS ---
+
+            const handleSendMessage = async() => {
+                const currentInput = chatInput.value.trim();
+                if (currentInput === '' || isLoading) return;
+
+                // Add user message to history and render
+                chatHistory.push({
+                    role: 'user',
+                    parts: [{
+                        text: currentInput
+                    }]
+                });
+                chatInput.value = '';
+                renderChat();
+
+                // Set loading state and update UI
+                isLoading = true;
+                updateLoadingState();
+
+                try {
+                    const conversation = chatHistory.map(msg => ({
+                        role: msg.role === 'assistant' ? 'model' : 'user',
+                        parts: msg.parts,
+                    }));
+
+                    const payload = {
+                        contents: conversation
+                    };
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODELS[selectedModel].endpoint}:generateContent?key=`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error ? .message || 'An unknown API error occurred.');
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].content) {
+                        chatHistory.push(result.candidates[0].content);
+                    } else {
+                        throw new Error('Received an invalid response from the model.');
+                    }
+                } catch (error) {
+                    chatHistory.push({
+                        role: 'assistant',
+                        parts: [{
+                            text: `**Error:** ${error.message}`
+                        }]
+                    });
+                } finally {
+                    isLoading = false;
+                    updateLoadingState(); // Remove loading bubble
+                    renderChat(); // Render final response
+                }
+            };
+
+            const handleModelChange = (modelId) => {
+                selectedModel = modelId;
+                isModelSelectorOpen = false;
+                modelSelectorDropdown.classList.add('hidden');
+                modelSelectorChevron.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>'; // Chevron Down
+                updateUIForModel();
+                // Reset chat with a welcome message
+                chatHistory = [{
+                    role: 'assistant',
+                    parts: [{
+                        text: `Welcome! I'm now set to **${MODELS[selectedModel].name}**. How can I help you?`
+                    }]
+                }];
+                renderChat();
+            };
+
+            // --- EVENT LISTENERS ---
+            sendButton.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+
+            modelSelectorButton.addEventListener('click', () => {
+                isModelSelectorOpen = !isModelSelectorOpen;
+                modelSelectorDropdown.classList.toggle('hidden');
+                // Toggle chevron icon
+                if (isModelSelectorOpen) {
+                    modelSelectorChevron.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>'; // Chevron Up
+                } else {
+                    modelSelectorChevron.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>'; // Chevron Down
+                }
+            });
+
+            // --- INITIALIZATION ---
+            const initializeApp = () => {
+                updateUIForModel();
+                renderModelSelector();
+                chatHistory = [{
+                    role: 'assistant',
+                    parts: [{
+                        text: `Welcome! I'm currently set to **${MODELS[selectedModel].name}**. How can I help you?`
+                    }]
+                }];
+                renderChat();
+            };
+
+            initializeApp();
+        });
+    </script>
+</body>
+
+</html>
