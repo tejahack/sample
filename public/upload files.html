@@ -15,24 +15,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Google Analytics - IMPORTANT: Replace G-XXXXXXXXXX with your Measurement ID -->
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DH5HGQTRCJ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-DH5HGQTRCJ');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH5HGQTRCJ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      // Replace G-XXXXXXXXXX with your Measurement ID
-      gtag('config', 'G-XXXXXXXXXX'); 
+      gtag('config', 'G-DH5HGQTRCJ');
     </script>
+
+    <!-- Google AdSense - IMPORTANT: Replace ca-pub-XXXXXXXXXXXXXXXX with your Publisher ID -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+     crossorigin="anonymous"></script>
 
     <style>
         /* General Styles */
@@ -69,6 +64,7 @@
             height: 100vh;
             align-items: center;
             justify-content: center;
+            flex-direction: column; /* Allow stacking of container and ad */
         }
 
         .auth-container {
@@ -80,6 +76,7 @@
             width: 768px;
             max-width: 100%;
             min-height: 480px;
+            margin-bottom: 20px; /* Space for the ad */
         }
 
         .auth-container p {
@@ -347,6 +344,17 @@
                 </div>
             </div>
         </div>
+        <!-- Ad Slot for Auth Page -->
+        <div class="auth-ad-container" style="width: 728px; height: 90px; margin-top: 20px;">
+            <!-- Replace with your Publisher ID and Ad Slot ID -->
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:728px;height:90px"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="YYYYYYYYYY"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
     </div>
 
     <!-- ======================= FILE MANAGER PAGE ======================= -->
@@ -357,7 +365,18 @@
                     <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">File Manager</h1>
                     <p id="user-email" class="mt-1 text-gray-600"></p>
                 </div>
-                <button id="logout-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <!-- Ad Slot for File Manager Header -->
+                <div class="header-ad-container mx-4">
+                     <!-- Replace with your Publisher ID and Ad Slot ID -->
+                    <ins class="adsbygoogle"
+                         style="display:inline-block;width:468px;height:60px"
+                         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                         data-ad-slot="ZZZZZZZZZZ"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                <button id="logout-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-shrink-0">
                     Logout
                 </button>
             </header>
@@ -407,7 +426,8 @@
         const SUPABASE_URL = 'https://rzchuprmrfqqndhxdafm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6Y2h1cHJtcmZxcW5kaHhkYWZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4NDQ1NDMsImV4cCI6MjA2ODQyMDU0M30.Y6D7maOWAZOF_K3eCHDLo3sod9D9Xk1GmmHJ0r8Wmhs';
         const BUCKET_NAME = 'files';
-        const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // IMPORTANT: Replace with your GA Measurement ID
+        const GA_MEASUREMENT_ID = 'G-DH5HGQTRCJ'; // Updated with your ID
+        const ADSENSE_PUBLISHER_ID = 'ca-pub-XXXXXXXXXXXXXXXX'; // IMPORTANT: Replace with your AdSense Publisher ID
 
         // --- INITIALIZATION ---
         let supabaseClient;
