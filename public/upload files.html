@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Auth & File Manager</title>
+    <!-- Font Awesome for social icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Tailwind CSS (for file manager part) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #c9d6ff;
+            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+            transition: background-color 0.5s;
+        }
+
+        /* Hide pages by default */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* Auth Page Styles */
+        #auth-page {
+            width: 100%;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-container {
+            background-color: #fff;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+            width: 768px;
+            max-width: 100%;
+            min-height: 480px;
+        }
+
+        .auth-container p {
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.3px;
+            margin: 20px 0;
+        }
+
+        .auth-container span {
+            font-size: 12px;
+        }
+
+        .auth-container a {
+            color: #333;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 15px 0 10px;
+        }
+
+        .auth-container button {
+            background-color: #512da8;
+            color: #fff;
+            font-size: 12px;
+            padding: 10px 45px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .auth-container button.hidden-btn {
+            background-color: transparent;
+            border-color: #fff;
+        }
+
+        .auth-container form {
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            height: 100%;
+        }
+
+        .auth-container input {
+            background-color: #eee;
+            border: none;
+            margin: 8px 0;
+            padding: 10px 15px;
+            font-size: 13px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+        .sign-in {
+            left: 0;
+            width: 50%;
+            z-index: 2;
+        }
+
+        .auth-container.active .sign-in {
+            transform: translateX(100%);
+        }
+
+        .sign-up {
+            left: 0;
+            width: 50%;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .auth-container.active .sign-up {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+            animation: move 0.6s;
+        }
+
+        @keyframes move {
+            0%, 49.99% {
+                opacity: 0;
+                z-index: 1;
+            }
+            50%, 100% {
+                opacity: 1;
+                z-index: 5;
+            }
+        }
+
+        .social-icons {
+            margin: 20px 0;
+        }
+
+        .social-icons a {
+            border: 1px solid #ccc;
+            border-radius: 20%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 3px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .toggle-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: all 0.6s ease-in-out;
+            border-radius: 150px 0 0 100px;
+            z-index: 1000;
+        }
+
+        .auth-container.active .toggle-container {
+            transform: translateX(-100%);
+            border-radius: 0 150px 100px 0;
+        }
+
+        .toggle {
+            background-color: #512da8;
+            height: 100%;
+            background: linear-gradient(to right, #5c6bc0, #512da8);
+            color: #fff;
+            position: relative;
+            left: -100%;
+            width: 200%;
+            transform: translateX(0);
+            transition: all 0.6s ease-in-out;
+        }
+
+        .auth-container.active .toggle {
+            transform: translateX(50%);
+        }
+
+        .toggle-panel {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 30px;
+            text-align: center;
+            top: 0;
+            transform: translateX(0);
+            transition: all 0.6s ease-in-out;
+        }
+
+        .toggle-left {
+            transform: translateX(-200%);
+        }
+
+        .auth-container.active .toggle-left {
+            transform: translateX(0);
+        }
+
+        .toggle-right {
+            right: 0;
+            transform: translateX(0);
+        }
+
+        .auth-container.active .toggle-right {
+            transform: translateX(200%);
+        }
+        
+        .status-message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .status-success { color: #28a745; }
+        .status-error { color: #dc3545; }
+
+
+        /* File Manager Page Styles */
+        #file-manager-page {
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+            align-items: flex-start;
+            justify-content: center;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .file-item {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ======================= AUTHENTICATION PAGE ======================= -->
+    <div id="auth-page" class="page active">
+        <div class="auth-container" id="auth-container">
+            <!-- Sign Up Form -->
+            <div class="form-container sign-up">
+                <form id="sign-up-form">
+                    <h1>Create Account</h1>
+                    <div class="social-icons">
+                        <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                    </div>
+                    <span>or use your email for registration</span>
+                    <input type="text" id="sign-up-name" placeholder="Name" required>
+                    <input type="email" id="sign-up-email" placeholder="Email" required>
+                    <input type="password" id="sign-up-password" placeholder="Password" required>
+                    <button type="submit">Sign Up</button>
+                    <div id="sign-up-status" class="status-message"></div>
+                </form>
+            </div>
+            <!-- Sign In Form -->
+            <div class="form-container sign-in">
+                <form id="sign-in-form">
+                    <h1>Sign In</h1>
+                    <div class="social-icons">
+                        <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                    </div>
+                    <span>or use your email account</span>
+                    <input type="email" id="sign-in-email" placeholder="Email" required>
+                    <input type="password" id="sign-in-password" placeholder="Password" required>
+                    <a href="#">Forgot Your Password?</a>
+                    <button type="submit">Sign In</button>
+                    <div id="sign-in-status" class="status-message"></div>
+                </form>
+            </div>
+            <!-- Toggle Overlay -->
+            <div class="toggle-container">
+                <div class="toggle">
+                    <div class="toggle-panel toggle-left">
+                        <h1>Welcome Back!</h1>
+                        <p>Enter your personal details to use all of the site features</p>
+                        <button class="hidden-btn" id="login">Sign In</button>
+                    </div>
+                    <div class="toggle-panel toggle-right">
+                        <h1>Hello, Friend!</h1>
+                        <p>Register with your personal details to use all of the site features</p>
+                        <button class="hidden-btn" id="register">Sign Up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================= FILE MANAGER PAGE ======================= -->
+    <div id="file-manager-page" class="page">
+        <div class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">File Manager</h1>
+                    <p id="user-email" class="mt-1 text-gray-600"></p>
+                </div>
+                <button id="logout-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Logout
+                </button>
+            </header>
+
+            <main>
+                <!-- Upload Section -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Upload a New File</h2>
+                    <form id="upload-form" class="space-y-4">
+                        <div>
+                            <label for="file-input" class="block text-sm font-medium text-gray-700 mb-1">Select file</label>
+                            <input type="file" id="file-input" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors duration-200"/>
+                        </div>
+                        <div id="preview-container" class="mt-4"></div>
+                        <button type="submit" id="upload-button" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                            <svg id="upload-icon" class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M3 17.25V21h18v-3.75M3 12.75h18" /></svg>
+                            <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span id="button-text">Upload File</span>
+                        </button>
+                    </form>
+                    <div id="upload-status-message" class="mt-4 text-sm"></div>
+                </div>
+
+                <!-- Files List Section -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h2 class="text-xl font-semibold mb-4">Uploaded Files</h2>
+                    <div id="files-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <p id="no-files-message" class="text-gray-500 hidden col-span-full">No files found. Upload a file to get started!</p>
+                    </div>
+                    <div id="list-loading" class="text-center py-4 hidden"><p class="text-gray-500">Loading files...</p></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Full-size Image Preview Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="relative bg-white p-2 rounded-lg max-w-4xl max-h-full shadow-lg">
+            <button id="modal-close-button" class="absolute -top-3 -right-3 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200 z-10 shadow-md"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <img id="modal-image" src="" alt="Full-size preview" class="max-w-full max-h-[85vh] object-contain rounded-md">
+        </div>
+    </div>
+
+
+    <script>
+        // --- SUPABASE SETUP ---
+        const SUPABASE_URL = 'https://rzchuprmrfqqndhxdafm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6Y2h1cHJtcmZxcW5kaHhkYWZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4NDQ1NDMsImV4cCI6MjA2ODQyMDU0M30.Y6D7maOWAZOF_K3eCHDLo3sod9D9Xk1GmmHJ0r8Wmhs';
+        const BUCKET_NAME = 'files';
+
+        // --- INITIALIZATION ---
+        let supabaseClient;
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // --- PAGE ROUTING ---
+        const authPage = document.getElementById('auth-page');
+        const fileManagerPage = document.getElementById('file-manager-page');
+        const userEmailDisplay = document.getElementById('user-email');
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            // Adjust body style for file manager
+            if (pageId === 'file-manager-page') {
+                document.body.style.background = '#f3f4f6';
+                document.body.style.alignItems = 'flex-start';
+            } else {
+                document.body.style.background = 'linear-gradient(to right, #e2e2e2, #c9d6ff)';
+                document.body.style.alignItems = 'center';
+            }
+        }
+
+        // --- AUTHENTICATION LOGIC ---
+        const authContainer = document.getElementById('auth-container');
+        const registerBtn = document.getElementById('register');
+        const loginBtn = document.getElementById('login');
+        const signUpForm = document.getElementById('sign-up-form');
+        const signInForm = document.getElementById('sign-in-form');
+        const logoutButton = document.getElementById('logout-button');
+
+        registerBtn.addEventListener('click', () => authContainer.classList.add("active"));
+        loginBtn.addEventListener('click', () => authContainer.classList.remove("active"));
+
+        function setAuthStatus(form, message, isError = false) {
+            const statusEl = document.getElementById(`${form}-status`);
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
+        }
+
+        // Handle Sign Up
+        signUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('sign-up-name').value;
+            const email = document.getElementById('sign-up-email').value;
+            const password = document.getElementById('sign-up-password').value;
+
+            setAuthStatus('sign-up', 'Creating account...', false);
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        full_name: name,
+                    }
+                }
+            });
+
+            if (error) {
+                setAuthStatus('sign-up', error.message, true);
+            } else {
+                setAuthStatus('sign-up', 'Account created! Please check your email to verify.', false);
+                signUpForm.reset();
+            }
+        });
+
+        // Handle Sign In
+        signInForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('sign-in-email').value;
+            const password = document.getElementById('sign-in-password').value;
+
+            setAuthStatus('sign-in', 'Signing in...', false);
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                setAuthStatus('sign-in', error.message, true);
+            } else {
+                setAuthStatus('sign-in', 'Login successful!', false);
+                // The onAuthStateChange listener will handle the redirect
+            }
+        });
+        
+        // Handle Logout
+        logoutButton.addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            // The onAuthStateChange listener will handle the redirect
+        });
+
+        // --- AUTH STATE LISTENER ---
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) {
+                showPage('file-manager-page');
+                userEmailDisplay.textContent = `Logged in as: ${session.user.email}`;
+                listFiles(); // Load files for the logged-in user
+            } else {
+                showPage('auth-page');
+            }
+        });
+
+
+        // --- FILE MANAGER LOGIC ---
+        const uploadForm = document.getElementById('upload-form');
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const buttonText = document.getElementById('button-text');
+        const uploadIcon = document.getElementById('upload-icon');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const uploadStatusMessage = document.getElementById('upload-status-message');
+        const filesList = document.getElementById('files-list');
+        const noFilesMessage = document.getElementById('no-files-message');
+        const listLoading = document.getElementById('list-loading');
+        const previewContainer = document.getElementById('preview-container');
+        const imageModal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalCloseButton = document.getElementById('modal-close-button');
+
+        function setUploadStatus(message, isError = false) {
+            uploadStatusMessage.textContent = message;
+            uploadStatusMessage.className = isError ? 'mt-4 text-sm text-red-600' : 'mt-4 text-sm text-green-600';
+        }
+
+        function setUploadLoadingState(isLoading) {
+            uploadButton.disabled = isLoading;
+            buttonText.textContent = isLoading ? 'Uploading...' : 'Upload File';
+            uploadIcon.classList.toggle('hidden', isLoading);
+            loadingSpinner.classList.toggle('hidden', !isLoading);
+        }
+
+        async function listFiles() {
+            filesList.innerHTML = '';
+            noFilesMessage.classList.add('hidden');
+            listLoading.classList.remove('hidden');
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) throw new Error("User not logged in.");
+
+                const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).list(user.id, { limit: 100, offset: 0, sortBy: { column: 'created_at', order: 'desc' } });
+                if (error) throw error;
+                
+                // Clear list before adding new items
+                while (filesList.firstChild && filesList.firstChild !== noFilesMessage) {
+                    filesList.removeChild(filesList.firstChild);
+                }
+                
+                if (data.length === 0) {
+                    noFilesMessage.classList.remove('hidden');
+                } else {
+                    data.forEach(file => { if (file.id !== null) { createFileListItem(file, user.id); } });
+                }
+            } catch (error) {
+                console.error('Error listing files:', error);
+                setUploadStatus(`Error: Could not load files. ${error.message}`, true);
+            } finally {
+                listLoading.classList.add('hidden');
+            }
+        }
+
+        function createFileListItem(file, userId) {
+            const fileDiv = document.createElement('div');
+            fileDiv.className = 'file-item flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden';
+            
+            const filePath = `${userId}/${file.name}`;
+            const { data: { publicUrl } } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+
+            if (file.metadata && file.metadata.mimetype.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = publicUrl;
+                img.alt = file.name;
+                img.className = 'w-full h-48 object-cover bg-gray-200 cursor-pointer hover:opacity-90 transition-opacity';
+                img.onclick = () => showImagePreview(publicUrl);
+                fileDiv.appendChild(img);
+            } else {
+                const fileIconContainer = document.createElement('div');
+                fileIconContainer.className = 'w-full h-48 bg-gray-100 flex items-center justify-center';
+                fileIconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>`;
+                fileDiv.appendChild(fileIconContainer);
+            }
+
+            const fileInfoBox = document.createElement('div');
+            fileInfoBox.className = 'p-3 flex flex-col flex-grow';
+            const fileName = document.createElement('span');
+            fileName.textContent = file.name;
+            fileName.className = 'text-sm font-medium truncate mb-2 flex-grow';
+            fileInfoBox.appendChild(fileName);
+            
+            const fileActions = document.createElement('div');
+            fileActions.className = 'flex items-center space-x-2';
+            const downloadButton = document.createElement('button');
+            downloadButton.textContent = 'Download';
+            downloadButton.className = 'w-full px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors';
+            downloadButton.onclick = () => downloadFile(filePath);
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`;
+            deleteButton.className = 'p-2 text-xs font-medium text-red-500 bg-red-100 rounded-md hover:bg-red-200 transition-colors';
+            deleteButton.onclick = () => deleteFile(filePath);
+            fileActions.appendChild(downloadButton);
+            fileActions.appendChild(deleteButton);
+            fileInfoBox.appendChild(fileActions);
+            fileDiv.appendChild(fileInfoBox);
+            filesList.appendChild(fileDiv);
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            setUploadLoadingState(true);
+            setUploadStatus('');
+            const file = fileInput.files[0];
+            if (!file) {
+                setUploadStatus('Please select a file to upload.', true);
+                setUploadLoadingState(false);
+                return;
+            }
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) throw new Error("User not logged in.");
+                
+                const filePath = `${user.id}/${file.name}`;
+                const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false });
+                if (error) {
+                    if (error.message.includes('Duplicate')) {
+                         setUploadStatus(`Error: A file named "${file.name}" already exists.`, true);
+                    } else { throw error; }
+                } else {
+                    setUploadStatus(`Successfully uploaded "${file.name}"!`, false);
+                    uploadForm.reset();
+                    previewContainer.innerHTML = '';
+                    await listFiles();
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                setUploadStatus(`Error uploading file: ${error.message}`, true);
+            } finally {
+                setUploadLoadingState(false);
+            }
+        });
+
+        async function downloadFile(filePath) {
+            try {
+                const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).download(filePath);
+                if (error) throw error;
+                const url = window.URL.createObjectURL(data);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filePath.split('/').pop();
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                setUploadStatus(`Error downloading file: ${error.message}`, true);
+            }
+        }
+
+        async function deleteFile(filePath) {
+            if (!confirm(`Are you sure you want to delete "${filePath.split('/').pop()}"?`)) return;
+            try {
+                const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).remove([filePath]);
+                if (error) throw error;
+                setUploadStatus(`Successfully deleted file.`, false);
+                await listFiles();
+            } catch (error) {
+                console.error('Error deleting file:', error);
+                setUploadStatus(`Error deleting file: ${error.message}`, true);
+            }
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            previewContainer.innerHTML = '';
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.alt = 'Image preview';
+                    img.className = 'w-full h-auto rounded-lg shadow-md';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function showImagePreview(url) {
+            modalImage.src = url;
+            imageModal.classList.remove('hidden');
+        }
+
+        function hideImagePreview() {
+            imageModal.classList.add('hidden');
+            modalImage.src = '';
+        }
+        
+        modalCloseButton.addEventListener('click', hideImagePreview);
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                hideImagePreview();
+            }
+        });
+
+    </script>
+</body>
+</html>
