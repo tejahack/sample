@@ -15,6 +15,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Google Analytics - IMPORTANT: Replace G-XXXXXXXXXX with your Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // Replace G-XXXXXXXXXX with your Measurement ID
+      gtag('config', 'G-XXXXXXXXXX'); 
+    </script>
+
     <style>
         /* General Styles */
         * {
@@ -346,17 +357,17 @@
             <main>
                 <!-- Upload Section -->
                 <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8">
-                    <h2 class="text-xl font-semibold mb-4">Upload a New File</h2>
+                    <h2 class="text-xl font-semibold mb-4">Upload New Files or Folders</h2>
                     <form id="upload-form" class="space-y-4">
                         <div>
-                            <label for="file-input" class="block text-sm font-medium text-gray-700 mb-1">Select file</label>
-                            <input type="file" id="file-input" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors duration-200"/>
+                            <label for="file-input" class="block text-sm font-medium text-gray-700 mb-1">Select files or a folder</label>
+                            <input type="file" id="file-input" required multiple webkitdirectory class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors duration-200"/>
                         </div>
                         <div id="preview-container" class="mt-4"></div>
                         <button type="submit" id="upload-button" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
                             <svg id="upload-icon" class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M3 17.25V21h18v-3.75M3 12.75h18" /></svg>
                             <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            <span id="button-text">Upload File</span>
+                            <span id="button-text">Upload Files</span>
                         </button>
                     </form>
                     <div id="upload-status-message" class="mt-4 text-sm"></div>
@@ -388,11 +399,19 @@
         const SUPABASE_URL = 'https://rzchuprmrfqqndhxdafm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6Y2h1cHJtcmZxcW5kaHhkYWZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4NDQ1NDMsImV4cCI6MjA2ODQyMDU0M30.Y6D7maOWAZOF_K3eCHDLo3sod9D9Xk1GmmHJ0r8Wmhs';
         const BUCKET_NAME = 'files';
+        const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // IMPORTANT: Replace with your GA Measurement ID
 
         // --- INITIALIZATION ---
         let supabaseClient;
         if (SUPABASE_URL && SUPABASE_ANON_KEY) {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // --- Google Analytics Event Tracking ---
+        function trackEvent(eventName, eventParams) {
+            if (window.gtag) {
+                window.gtag('event', eventName, eventParams);
+            }
         }
 
         // --- PAGE ROUTING ---
@@ -404,7 +423,6 @@
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
-            // Adjust body style for file manager
             if (pageId === 'file-manager-page') {
                 document.body.style.background = '#f3f4f6';
                 document.body.style.alignItems = 'flex-start';
@@ -431,66 +449,52 @@
             statusEl.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
         }
 
-        // Handle Sign Up
         signUpForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('sign-up-name').value;
             const email = document.getElementById('sign-up-email').value;
             const password = document.getElementById('sign-up-password').value;
-
             setAuthStatus('sign-up', 'Creating account...', false);
 
             const { data, error } = await supabaseClient.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        full_name: name,
-                    }
-                }
+                email: email, password: password, options: { data: { full_name: name } }
             });
 
             if (error) {
                 setAuthStatus('sign-up', error.message, true);
             } else {
                 setAuthStatus('sign-up', 'Account created! Please check your email to verify.', false);
+                trackEvent('sign_up', { method: 'email' });
                 signUpForm.reset();
             }
         });
 
-        // Handle Sign In
         signInForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('sign-in-email').value;
             const password = document.getElementById('sign-in-password').value;
-
             setAuthStatus('sign-in', 'Signing in...', false);
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
 
             if (error) {
                 setAuthStatus('sign-in', error.message, true);
             } else {
                 setAuthStatus('sign-in', 'Login successful!', false);
-                // The onAuthStateChange listener will handle the redirect
+                trackEvent('login', { method: 'email' });
             }
         });
         
-        // Handle Logout
         logoutButton.addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
-            // The onAuthStateChange listener will handle the redirect
+            trackEvent('logout');
         });
 
-        // --- AUTH STATE LISTENER ---
         supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session && session.user) {
                 showPage('file-manager-page');
                 userEmailDisplay.textContent = `Logged in as: ${session.user.email}`;
-                listFiles(); // Load files for the logged-in user
+                listFiles();
             } else {
                 showPage('auth-page');
             }
@@ -520,7 +524,7 @@
 
         function setUploadLoadingState(isLoading) {
             uploadButton.disabled = isLoading;
-            buttonText.textContent = isLoading ? 'Uploading...' : 'Upload File';
+            buttonText.textContent = isLoading ? 'Uploading...' : 'Upload Files';
             uploadIcon.classList.toggle('hidden', isLoading);
             loadingSpinner.classList.toggle('hidden', !isLoading);
         }
@@ -536,7 +540,6 @@
                 const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).list(user.id, { limit: 100, offset: 0, sortBy: { column: 'created_at', order: 'desc' } });
                 if (error) throw error;
                 
-                // Clear list before adding new items
                 while (filesList.firstChild && filesList.firstChild !== noFilesMessage) {
                     filesList.removeChild(filesList.firstChild);
                 }
@@ -602,32 +605,43 @@
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             setUploadLoadingState(true);
-            setUploadStatus('');
-            const file = fileInput.files[0];
-            if (!file) {
-                setUploadStatus('Please select a file to upload.', true);
+            const files = fileInput.files;
+            if (files.length === 0) {
+                setUploadStatus('Please select files to upload.', true);
                 setUploadLoadingState(false);
                 return;
             }
+
+            setUploadStatus(`Uploading ${files.length} file(s)...`);
+            
             try {
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) throw new Error("User not logged in.");
-                
-                const filePath = `${user.id}/${file.name}`;
-                const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false });
-                if (error) {
-                    if (error.message.includes('Duplicate')) {
-                         setUploadStatus(`Error: A file named "${file.name}" already exists.`, true);
-                    } else { throw error; }
+
+                const uploadPromises = Array.from(files).map(file => {
+                    const filePath = `${user.id}/${file.webkitRelativePath || file.name}`;
+                    return supabaseClient.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: true });
+                });
+
+                const results = await Promise.all(uploadPromises);
+
+                const successfulUploads = results.filter(result => !result.error).length;
+                const failedUploads = results.length - successfulUploads;
+
+                if (failedUploads > 0) {
+                    setUploadStatus(`Completed. Successfully uploaded ${successfulUploads} file(s). Failed to upload ${failedUploads} file(s).`, true);
                 } else {
-                    setUploadStatus(`Successfully uploaded "${file.name}"!`, false);
-                    uploadForm.reset();
-                    previewContainer.innerHTML = '';
-                    await listFiles();
+                    setUploadStatus(`Successfully uploaded all ${successfulUploads} file(s)!`, false);
                 }
+                
+                trackEvent('file_upload', { number_of_files: successfulUploads });
+                uploadForm.reset();
+                previewContainer.innerHTML = '';
+                await listFiles();
+
             } catch (error) {
-                console.error('Error uploading file:', error);
-                setUploadStatus(`Error uploading file: ${error.message}`, true);
+                console.error('Error uploading files:', error);
+                setUploadStatus(`Error uploading files: ${error.message}`, true);
             } finally {
                 setUploadLoadingState(false);
             }
@@ -653,11 +667,13 @@
         }
 
         async function deleteFile(filePath) {
-            if (!confirm(`Are you sure you want to delete "${filePath.split('/').pop()}"?`)) return;
+            const fileName = filePath.split('/').pop();
+            if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return;
             try {
                 const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).remove([filePath]);
                 if (error) throw error;
-                setUploadStatus(`Successfully deleted file.`, false);
+                setUploadStatus(`Successfully deleted ${fileName}.`, false);
+                trackEvent('file_delete', { file_name: fileName });
                 await listFiles();
             } catch (error) {
                 console.error('Error deleting file:', error);
