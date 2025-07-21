@@ -26,7 +26,7 @@
     </script>
 
     <!-- Google AdSense - IMPORTANT: Replace ca-pub-XXXXXXXXXXXXXXXX with your Publisher ID -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-6053472426184751"
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6053472426184751"
      crossorigin="anonymous"></script>
 
     <style>
@@ -349,7 +349,7 @@
             <!-- Replace with your Publisher ID and Ad Slot ID -->
             <ins class="adsbygoogle"
                  style="display:inline-block;width:728px;height:90px"
-                 data-ad-client="ca-app-pub-6053472426184751"
+                 data-ad-client="ca-pub-6053472426184751"
                  data-ad-slot="3846659863"></ins>
             <script>
                  (adsbygoogle = window.adsbygoogle || []).push({});
@@ -370,7 +370,7 @@
                      <!-- Replace with your Publisher ID and Ad Slot ID -->
                     <ins class="adsbygoogle"
                          style="display:inline-block;width:468px;height:60px"
-                         data-ad-client="ca-app-pub-6053472426184751"
+                         data-ad-client="ca-pub-6053472426184751"
                          data-ad-slot="3846659863"></ins>
                     <script>
                          (adsbygoogle = window.adsbygoogle || []).push({});
@@ -402,9 +402,12 @@
 
                 <!-- Files List Section -->
                 <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <div id="breadcrumb" class="flex items-center text-sm text-gray-500 mb-4">
+                        <!-- Breadcrumb navigation will be generated here -->
+                    </div>
                     <h2 class="text-xl font-semibold mb-4">Uploaded Files</h2>
                     <div id="files-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <p id="no-files-message" class="text-gray-500 hidden col-span-full">No files found. Upload a file to get started!</p>
+                        <p id="no-files-message" class="text-gray-500 hidden col-span-full">No files or folders found. Upload something to get started!</p>
                     </div>
                     <div id="list-loading" class="text-center py-4 hidden"><p class="text-gray-500">Loading files...</p></div>
                 </div>
@@ -426,11 +429,13 @@
         const SUPABASE_URL = 'https://rzchuprmrfqqndhxdafm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6Y2h1cHJtcmZxcW5kaHhkYWZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4NDQ1NDMsImV4cCI6MjA2ODQyMDU0M30.Y6D7maOWAZOF_K3eCHDLo3sod9D9Xk1GmmHJ0r8Wmhs';
         const BUCKET_NAME = 'files';
-        const GA_MEASUREMENT_ID = 'G-DH5HGQTRCJ'; // Updated with your ID
-        const ADSENSE_PUBLISHER_ID = 'ca-pub-XXXXXXXXXXXXXXXX'; // IMPORTANT: Replace with your AdSense Publisher ID
+        const GA_MEASUREMENT_ID = 'G-DH5HGQTRCJ';
+        const ADSENSE_PUBLISHER_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
 
         // --- INITIALIZATION ---
         let supabaseClient;
+        let currentPath = ''; // To track the current folder path
+        
         if (SUPABASE_URL && SUPABASE_ANON_KEY) {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
@@ -483,14 +488,17 @@
             const email = document.getElementById('sign-up-email').value;
             const password = document.getElementById('sign-up-password').value;
             setAuthStatus('sign-up', 'Creating account...', false);
-
             const { data, error } = await supabaseClient.auth.signUp({
-                email: email, password: password, options: { data: { full_name: name } }
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        full_name: name,
+                    }
+                }
             });
-
-            if (error) {
-                setAuthStatus('sign-up', error.message, true);
-            } else {
+            if (error) setAuthStatus('sign-up', error.message, true);
+            else {
                 setAuthStatus('sign-up', 'Account created! Please check your email to verify.', false);
                 trackEvent('sign_up', { method: 'email' });
                 signUpForm.reset();
@@ -502,12 +510,9 @@
             const email = document.getElementById('sign-in-email').value;
             const password = document.getElementById('sign-in-password').value;
             setAuthStatus('sign-in', 'Signing in...', false);
-
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
-
-            if (error) {
-                setAuthStatus('sign-in', error.message, true);
-            } else {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) setAuthStatus('sign-in', error.message, true);
+            else {
                 setAuthStatus('sign-in', 'Login successful!', false);
                 trackEvent('login', { method: 'email' });
             }
@@ -518,16 +523,18 @@
             trackEvent('logout');
         });
 
+        // FIXED: Refactored onAuthStateChange to be more reliable
         supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session && session.user) {
+                currentPath = session.user.id; // Set the root path for the user
                 showPage('file-manager-page');
                 userEmailDisplay.textContent = `Logged in as: ${session.user.email}`;
-                listFiles();
+                listFiles(currentPath);
             } else {
                 showPage('auth-page');
+                currentPath = '';
             }
         });
-
 
         // --- FILE MANAGER LOGIC ---
         const uploadForm = document.getElementById('upload-form');
@@ -544,6 +551,7 @@
         const imageModal = document.getElementById('image-modal');
         const modalImage = document.getElementById('modal-image');
         const modalCloseButton = document.getElementById('modal-close-button');
+        const breadcrumb = document.getElementById('breadcrumb');
 
         function setUploadStatus(message, isError = false) {
             uploadStatusMessage.textContent = message;
@@ -557,25 +565,65 @@
             loadingSpinner.classList.toggle('hidden', !isLoading);
         }
 
-        async function listFiles() {
+        function updateBreadcrumb() {
+            breadcrumb.innerHTML = '';
+            // FIXED: Get root path reliably from currentPath
+            const rootPath = currentPath.split('/')[0];
+            
+            let pathSegments = currentPath.replace(rootPath, 'Home').split('/');
+            if (pathSegments[0] === 'Home' && pathSegments.length === 1) {
+                 // Don't show breadcrumb if we are in the root 'Home' directory
+            } else {
+                 pathSegments.forEach((segment, index) => {
+                    let pathSoFar = rootPath;
+                    for(let i = 1; i <= index; i++) {
+                        pathSoFar += `/${pathSegments[i]}`;
+                    }
+                    
+                    const segmentEl = document.createElement('span');
+                    if (index < pathSegments.length - 1) {
+                        const link = document.createElement('a');
+                        link.href = '#';
+                        link.textContent = segment;
+                        link.className = 'hover:underline';
+                        const currentPathForLink = pathSoFar;
+                        link.onclick = (e) => {
+                            e.preventDefault();
+                            listFiles(currentPathForLink);
+                        };
+                        segmentEl.appendChild(link);
+                        const separator = document.createElement('span');
+                        separator.textContent = ' / ';
+                        separator.className = 'mx-2';
+                        segmentEl.appendChild(separator);
+                    } else {
+                        segmentEl.textContent = segment;
+                        segmentEl.className = 'font-semibold text-gray-800';
+                    }
+                    breadcrumb.appendChild(segmentEl);
+                });
+            }
+        }
+
+        async function listFiles(path) {
+            currentPath = path;
             filesList.innerHTML = '';
             noFilesMessage.classList.add('hidden');
             listLoading.classList.remove('hidden');
+            updateBreadcrumb();
+            
             try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user) throw new Error("User not logged in.");
-
-                const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).list(user.id, { limit: 100, offset: 0, sortBy: { column: 'created_at', order: 'desc' } });
+                const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).list(path, { limit: 100, offset: 0, sortBy: { column: 'name', order: 'asc' } });
                 if (error) throw error;
                 
-                while (filesList.firstChild && filesList.firstChild !== noFilesMessage) {
-                    filesList.removeChild(filesList.firstChild);
-                }
-                
-                if (data.length === 0) {
+                const folders = data.filter(item => item.id === null); // Folders have no id
+                const files = data.filter(item => item.id !== null); // Files have an id
+
+                if (folders.length === 0 && files.length === 0) {
                     noFilesMessage.classList.remove('hidden');
                 } else {
-                    data.forEach(file => { if (file.id !== null) { createFileListItem(file, user.id); } });
+                    folders.forEach(folder => createFolderListItem(folder, path));
+                    files.forEach(file => createFileListItem(file, path));
                 }
             } catch (error) {
                 console.error('Error listing files:', error);
@@ -585,14 +633,35 @@
             }
         }
 
-        function createFileListItem(file, userId) {
+        function createFolderListItem(folder, path) {
+            const folderDiv = document.createElement('div');
+            folderDiv.className = 'file-item flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow';
+            folderDiv.onclick = () => listFiles(`${path}/${folder.name}`);
+
+            const iconContainer = document.createElement('div');
+            iconContainer.className = 'w-full h-48 bg-yellow-100 flex items-center justify-center';
+            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>`;
+            folderDiv.appendChild(iconContainer);
+
+            const infoBox = document.createElement('div');
+            infoBox.className = 'p-3';
+            const folderName = document.createElement('span');
+            folderName.textContent = folder.name;
+            folderName.className = 'text-sm font-medium truncate';
+            infoBox.appendChild(folderName);
+            folderDiv.appendChild(infoBox);
+            
+            filesList.appendChild(folderDiv);
+        }
+
+        function createFileListItem(file, path) {
             const fileDiv = document.createElement('div');
             fileDiv.className = 'file-item flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden';
             
-            const filePath = `${userId}/${file.name}`;
-            const { data: { publicUrl } } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-
+            const filePath = `${path}/${file.name}`;
+            
             if (file.metadata && file.metadata.mimetype.startsWith('image/')) {
+                const { data: { publicUrl } } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
                 const img = document.createElement('img');
                 img.src = publicUrl;
                 img.alt = file.name;
@@ -643,29 +712,19 @@
             setUploadStatus(`Uploading ${files.length} file(s)...`);
             
             try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user) throw new Error("User not logged in.");
-
                 const uploadPromises = Array.from(files).map(file => {
-                    const filePath = `${user.id}/${file.webkitRelativePath || file.name}`;
+                    const filePath = `${currentPath}/${file.webkitRelativePath || file.name}`;
                     return supabaseClient.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: true });
                 });
 
                 const results = await Promise.all(uploadPromises);
-
                 const successfulUploads = results.filter(result => !result.error).length;
-                const failedUploads = results.length - successfulUploads;
-
-                if (failedUploads > 0) {
-                    setUploadStatus(`Completed. Successfully uploaded ${successfulUploads} file(s). Failed to upload ${failedUploads} file(s).`, true);
-                } else {
-                    setUploadStatus(`Successfully uploaded all ${successfulUploads} file(s)!`, false);
-                }
                 
+                setUploadStatus(`Successfully uploaded ${successfulUploads} file(s)!`, false);
                 trackEvent('file_upload', { number_of_files: successfulUploads });
                 uploadForm.reset();
                 previewContainer.innerHTML = '';
-                await listFiles();
+                await listFiles(currentPath);
 
             } catch (error) {
                 console.error('Error uploading files:', error);
@@ -689,7 +748,6 @@
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
             } catch (error) {
-                console.error('Error downloading file:', error);
                 setUploadStatus(`Error downloading file: ${error.message}`, true);
             }
         }
@@ -702,9 +760,8 @@
                 if (error) throw error;
                 setUploadStatus(`Successfully deleted ${fileName}.`, false);
                 trackEvent('file_delete', { file_name: fileName });
-                await listFiles();
+                await listFiles(currentPath);
             } catch (error) {
-                console.error('Error deleting file:', error);
                 setUploadStatus(`Error deleting file: ${error.message}`, true);
             }
         }
