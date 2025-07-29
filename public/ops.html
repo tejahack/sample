@@ -3,137 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Construction</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        /* Custom styles for the page */
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Prevents scrollbars from appearing due to canvas */
-        }
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Place canvas behind all other content */
-        }
-    </style>
+    <title>Select Subject</title>
+    <link rel="shortcut icon" href="1.png" type="image/x-icon">
+      <link rel="stylesheet" href="app.css">
 </head>
-<body class="bg-gray-900 text-white">
-
-    <!-- Canvas for the three.js animation -->
-    <canvas id="bg-canvas"></canvas>
-
-    <!-- Main content container -->
-    <div class="relative flex flex-col items-center justify-center h-screen px-4">
-        <div class="text-center bg-gray-900 bg-opacity-70 p-8 rounded-2xl backdrop-blur-sm border border-gray-700 shadow-2xl">
-            <!-- Main Heading -->
-            <h1 class="text-4xl md:text-6xl font-black tracking-tighter text-yellow-400">
-                SITE UNDER CONSTRUCTION
-            </h1>
-            <!-- Subheading -->
-            <p class="mt-4 text-lg md:text-xl text-gray-300 max-w-2xl">
-                Our digital architects are hard at work crafting something amazing. Please check back soon!
-            </p>
-        </div>
-    </div>
-
-    <!-- three.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-    <script>
-        // Wait for the window to load before starting the animation
-        window.onload = function () {
-            // --- Basic Scene Setup ---
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({
-                canvas: document.getElementById('bg-canvas'),
-                antialias: true, // Smoothens the edges of the 3D object
-            });
-
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-
-            // --- 3D Object: TorusKnot ---
-            // A more complex and visually interesting shape than a simple cube
-            const geometry = new THREE.TorusKnotGeometry(10, 2.5, 100, 16);
-            // Material that reacts to light, with a metallic look
-            const material = new THREE.MeshStandardMaterial({
-                color: 0xffa500, // A construction-like orange/yellow
-                metalness: 0.8,   // Makes it look more metallic
-                roughness: 0.3    // Controls how shiny the surface is
-            });
-            const torusKnot = new THREE.Mesh(geometry, material);
-            scene.add(torusKnot);
-
-            // --- Lighting ---
-            // Ambient light to illuminate the entire scene softly
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-            scene.add(ambientLight);
-
-            // Point light that will follow the mouse for interactive highlights
-            const pointLight = new THREE.PointLight(0xffffff, 1);
-            pointLight.position.set(5, 5, 5);
-            scene.add(pointLight);
-
-            // --- Camera Position ---
-            camera.position.z = 35;
-
-            // --- Mouse Interaction ---
-            // This function updates the point light's position based on mouse movement
-            function onMouseMove(event) {
-                // Convert mouse coordinates to normalized device coordinates (-1 to +1)
-                const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-                const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-
-                // Create a 3D vector from the mouse position
-                const vector = new THREE.Vector3(mouseX, mouseY, 0.5);
-                vector.unproject(camera); // Map the 2D screen position to the 3D world
-                const dir = vector.sub(camera.position).normalize();
-                const distance = -camera.position.z / dir.z;
-                const pos = camera.position.clone().add(dir.multiplyScalar(distance));
-                
-                // Update the point light's position
-                pointLight.position.copy(pos);
-            }
-            window.addEventListener('mousemove', onMouseMove);
-
-            // --- Animation Loop ---
-            // This function is called on every frame to create the animation
-            function animate() {
-                requestAnimationFrame(animate);
-
-                // Rotate the 3D object for continuous motion
-                torusKnot.rotation.x += 0.001;
-                torusKnot.rotation.y += 0.005;
-
-                // Render the scene from the camera's perspective
-                renderer.render(scene, camera);
-            }
-
-            // --- Responsiveness ---
-            // This function handles window resizing
-            function onWindowResize() {
-                // Update camera aspect ratio
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-
-                // Update renderer size
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-            window.addEventListener('resize', onWindowResize);
-
-            // Start the animation loop
-            animate();
-        };
-    </script>
+<body>
+    <h1>Select Subject</h1>
+    <ul>
+        <a href="http://gietblog.unaux.com/">Giet Blogs Website
+    </a>  
+      <a href="https://drive.google.com/file/d/1-t_iFUQ9K6LibxdKiD3EIKvgTVLp2s4e/view?usp=sharing">OS UNIT-1,2</a>
+    </a>
 </body>
 </html>
