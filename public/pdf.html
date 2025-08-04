@@ -21,16 +21,7 @@
        
          <a href="index.html">Back to Home Page
     </a>
-             <script>
-    if (sessionStorage.getItem("authenticated") !== "true") {
-      alert("Access Denied! Please login first.");
-      window.location.href = "paa.html";
-    }
-
-    window.addEventListener("beforeunload", () => {
-      sessionStorage.removeItem("authenticated");
-    });
-  </script>
+ 
 </body>
 </html>
 
