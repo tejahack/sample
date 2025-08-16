@@ -318,11 +318,12 @@
     © <span id="year"></span> Your Name. Built with glass, code, and care.
   </footer>
 
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
   <script>
-    src="https://cdn.emailjs.com/dist/email.min.js"></script>
-    <script>
     // Update year
-   
+    document.getElementById('year').textContent = new Date().getFullYear();
 
     // Smooth scroll for internal links
     document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -355,42 +356,49 @@
       });
     });
 
-   
-        (function() {
-            emailjs.init("9b7m3xeOv027u8o-e"); // Replace with your EmailJS public key
-        })();
+    // Contact Form Handler with EmailJS
+    (function() {
+        emailjs.init("9b7m3xeOv027u8o-e"); // Replace with your EmailJS public key
+    })();
 
-        const form = document.getElementById('contactForm');
-        const msg = document.getElementById('formMessage');
+    const form = document.getElementById('contact-form');
+    const statusMsg = document.getElementById('status');
+    const submitBtn = form.querySelector('button[type="submit"]');
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-            emailjs.sendForm('service_logm4nq', 'template_q7ou8mp', this)
-                .then(() => {
-                    msg.textContent = "Message sent successfully!";
-                    msg.style.color = "green";
-                    form.reset();
-                }, (error) => {
-                    msg.textContent = "Failed to send message. Please try again.";
-                    msg.style.color = "red";
-                    console.error('EmailJS Error:', error);
-                });
-        });
-   
+        // Basic validation
+        if (form.name.value === '' || form.email.value === '' || form.message.value === '') {
+            statusMsg.textContent = "Please fill out all fields.";
+            statusMsg.style.color = "rgb(var(--bg1))";
+            return;
+        }
 
+        const serviceID = 'service_3tcve1u'; // Replace with your EmailJS Service ID
+        const templateID = 'template_q7ou8mp'; // Replace with your EmailJS Template ID
 
-    // Subtle parallax on hero text
-    const hero = document.querySelector('.hero');
-    hero.addEventListener('pointermove', (e) => {
-      const r = hero.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      document.documentElement.style.setProperty('--bg1x', px);
-      document.documentElement.style.setProperty('--bg1y', py);
+        statusMsg.textContent = "Sending...";
+        statusMsg.style.color = "rgb(var(--muted))";
+        submitBtn.disabled = true;
 
-       document.getElementById('year').textContent = new Date().getFullYear();
+        emailjs.sendForm(serviceID, templateID, this)
+            .then(() => {
+                statusMsg.textContent = "Message sent successfully!";
+                statusMsg.style.color = "rgb(var(--bg3))";
+                submitBtn.disabled = false;
+                form.reset();
+                setTimeout(() => {
+                    statusMsg.textContent = "";
+                }, 5000);
+            }, (err) => {
+                statusMsg.textContent = "Failed to send. Please try again.";
+                statusMsg.style.color = "rgb(var(--bg1))";
+                submitBtn.disabled = false;
+                console.error('EmailJS Error:', JSON.stringify(err));
+            });
     });
+
   </script>
 </body>
 </html>
