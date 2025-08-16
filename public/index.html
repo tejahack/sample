@@ -1,404 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Glassy 3D Portfolio</title>
-  <meta name="description" content="A glassmorphism portfolio with 3D animations, motion graphics, and a contact page." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg1: 255, 115, 179; /* pink */
-      --bg2: 111, 119, 255; /* indigo */
-      --bg3: 72, 219, 251;  /* cyan */
-      --glass: 255, 255, 255;
-      --glass-alpha: 0.08;
-      --border-alpha: 0.22;
-      --text: 244, 247, 255;
-      --muted: 200, 210, 245;
-      --shadow: 2, 6, 30;
-      --radius: 22px;
-      --maxw: 1200px;
-    }
+    <meta charset="UTF-8">
 
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      color: rgb(var(--text));
-      background: radial-gradient(1200px 800px at 20% 10%, rgba(var(--bg3), 0.18), transparent 60%),
-                  radial-gradient(1000px 800px at 80% 20%, rgba(var(--bg2), 0.18), transparent 60%),
-                  radial-gradient(900px 700px at 50% 80%, rgba(var(--bg1), 0.20), #0b0f19 70%);
-      background-attachment: fixed;
-      overflow-x: hidden;
-    }
+    <title>Portfolio Website</title>
+    <meta name="description" content="Haptic - Web And Agency HTML Template">
+    <meta name="keywords" content="agency, app, business, company, corporate, designer, freelance, fullpage, modern, office, personal, portfolio, professional, web, web agency">
+    <meta name="author" content="Themexriver">
+    <link rel="shortcut icon" href="1.png" type="image/x-icon">
+    <!-- Mobile Specific Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    /* Decorative blurs */
-    .blob {
-      position: fixed; inset: 0; pointer-events: none; z-index: -1;
-      filter: blur(80px) saturate(130%);
-      opacity: 0.7;
-    }
-    .blob::before, .blob::after {
-      content: ""; position: absolute; border-radius: 50%;
-      width: 600px; height: 600px; mix-blend-mode: screen;
-      animation: float 22s ease-in-out infinite;
-    }
-    .blob::before { top: -120px; left: -80px; background: radial-gradient(circle at 30% 30%, rgba(var(--bg3), .45), transparent 60%);} 
-    .blob::after { bottom: -160px; right: -120px; background: radial-gradient(circle at 70% 70%, rgba(var(--bg1), .45), transparent 60%); animation-duration: 26s;}
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/fontawesome.css">
+    <link rel="stylesheet" href="assets/css/animate.css">
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/swiper.min.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
-    @keyframes float { 0%,100%{ transform: translateY(0) translateX(0) } 50%{ transform: translateY(20px) translateX(12px) } }
 
-    /* Glass utility */
-    .glass {
-      background: rgba(var(--glass), var(--glass-alpha));
-      border: 1px solid rgba(var(--glass), var(--border-alpha));
-      box-shadow: 0 10px 30px rgba(var(--shadow), .35), inset 0 1px 0 rgba(255,255,255,.08);
-      -webkit-backdrop-filter: blur(16px) saturate(130%);
-      backdrop-filter: blur(16px) saturate(130%);
-      border-radius: var(--radius);
-    }
-
-    .container { width: min(92%, var(--maxw)); margin-inline: auto; }
-
-    /* Header */
-    header {
-      position: sticky; top: 0; z-index: 40; backdrop-filter: blur(8px);
-    }
-    .nav {
-      margin: 14px auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: 0.5px; }
-    .brand .logo { width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, rgba(var(--bg2), .8), rgba(var(--bg1), .8)); box-shadow: inset 0 0 18px rgba(255,255,255,.25); }
-    nav a { color: rgb(var(--muted)); text-decoration: none; margin-left: 18px; font-weight: 600; opacity: .9; }
-    nav a:hover { color: rgb(var(--text)); }
-    .cta-btn { padding: 10px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,.25); text-decoration: none; font-weight: 700; }
-
-    /* Hero */
-    .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; align-items: center; padding: 72px 0 48px; }
-    .hero h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.02; margin: 0 0 10px; }
-    .hero p { color: rgb(var(--muted)); font-size: clamp(16px, 2vw, 18px); margin: 0 0 22px; }
-    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-    .btn { display: inline-block; padding: 12px 18px; border-radius: 14px; font-weight: 700; text-decoration: none; border: 1px solid rgba(255,255,255,.25); }
-    .btn.primary { background: linear-gradient(135deg, rgba(var(--bg2), .7), rgba(var(--bg1), .7)); color: white; }
-    .btn.secondary { background: rgba(255,255,255,.06); color: rgb(var(--text)); }
-
-    /* 3D decorative cube */
-    .cube-wrap { perspective: 1000px; display: grid; place-items: center; }
-    .cube { position: relative; width: 220px; height: 220px; transform-style: preserve-3d; animation: spin 16s linear infinite; }
-    .face { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; font-size: 22px; color: rgba(255,255,255,.9); }
-    .face::before { content: ""; position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(135deg, rgba(var(--bg3), .35), rgba(var(--bg2), .35)); border: 1px solid rgba(255,255,255,.28); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 12px 30px rgba(2, 6, 30, .35); }
-    .face span { position: relative; z-index: 2; }
-    /* Translate faces */
-    .cube .f1 { transform: translateZ(110px); }
-    .cube .f2 { transform: rotateY(90deg) translateZ(110px); }
-    .cube .f3 { transform: rotateY(180deg) translateZ(110px); }
-    .cube .f4 { transform: rotateY(-90deg) translateZ(110px); }
-    .cube .f5 { transform: rotateX(90deg) translateZ(110px); }
-    .cube .f6 { transform: rotateX(-90deg) translateZ(110px); }
-
-    @keyframes spin { from { transform: rotateX(-18deg) rotateY(0); } to { transform: rotateX(-18deg) rotateY(360deg); } }
-
-    /* Sections */
-    section { padding: 72px 0; }
-    .section-title { font-size: clamp(28px, 4vw, 40px); margin: 0 0 14px; }
-    .section-sub { color: rgb(var(--muted)); margin: 0 0 28px; }
-
-    /* About */
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .about-card { padding: 22px; }
-
-    /* Portfolio */
-    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
-    .card {
-      grid-column: span 4; min-height: 220px; padding: 18px; position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .2s ease, box-shadow .2s ease; cursor: pointer;
-    }
-    .card.large { grid-column: span 6; }
-    .card:hover { box-shadow: 0 14px 38px rgba(var(--shadow), .45); }
-    .card h3 { margin: 0 0 10px; }
-    .card p { margin: 0; color: rgb(var(--muted)); }
-    .tag { position: absolute; top: 12px; right: 12px; padding: 6px 10px; border-radius: 999px; font-size: 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); }
-    .card .bg-shape { position: absolute; width: 160%; height: 160%; left: -30%; top: -40%; transform: translateZ(-60px) rotate(15deg); background: radial-gradient(closest-side, rgba(var(--bg1), .15), transparent), radial-gradient(closest-side, rgba(var(--bg2), .18), transparent); filter: blur(18px); }
-
-    /* Motion graphics section (marquee) */
-    .marquee { overflow: hidden; border-radius: var(--radius); position: relative; }
-    .marquee-track { display: flex; gap: 22px; padding: 18px; animation: marquee 24s linear infinite; }
-    .chip { padding: 10px 14px; border-radius: 999px; white-space: nowrap; }
-    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%);} }
-
-    /* Contact */
-    form { display: grid; gap: 12px; }
-    label { font-weight: 700; font-size: 14px; color: rgba(255,255,255,.9); }
-    input, textarea { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); color: rgb(var(--text)); font: inherit; }
-    textarea { min-height: 120px; resize: vertical; }
-    .status { font-size: 14px; color: rgb(var(--muted)); }
-
-    /* Footer */
-    footer { padding: 26px 0 60px; color: rgb(var(--muted)); font-size: 14px; text-align: center; }
-
-    /* Utilities */
-    .row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .hidden { display: none; }
-
-    /* Responsive */
-    @media (max-width: 1000px) { .hero { grid-template-columns: 1fr; } .cube-wrap { order: -1; }
-      .about-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 800px) { .card, .card.large { grid-column: span 6; } }
-    @media (max-width: 560px) { .card, .card.large { grid-column: 1 / -1; } .nav { padding: 8px 12px; } }
-
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * { animation: none !important; transition: none !important; }
-    }
-  </style>
 </head>
-<body>
-  <div class="blob" aria-hidden="true"></div>
-  <header>
-    <div class="container nav glass">
-      <div class="brand"><div class="logo" aria-hidden="true"></div> <span>YOUR NAME</span></div>
-      <nav>
-        <a href="#home">Home</a>
-        <a href="#about">About</a>
-        <a href="#portfolio">Portfolio</a>
-        <a href="#motion">Motion</a>
-        <a href="#contact" class="cta-btn">Contact</a>
-      </nav>
+
+<body class="home-1">
+    <div id="preloader"></div>
+    <div class="up">
+        <a href="#" class="scrollup text-center"><i class="fas fa-chevron-up"></i></a>
     </div>
-  </header>
+    <div class="cursor"></div>
 
-  <!-- Hero -->
-  <main id="home" class="container hero">
-    <div>
-      <h1>Glassy. Bold. <span style="background: linear-gradient(135deg, rgba(var(--bg3), 1), rgba(var(--bg2), 1)); -webkit-background-clip:text; background-clip:text; color: transparent;">3D</span> Ready.</h1>
-      <p>Designer & developer crafting immersive, high-performance experiences with glassmorphism, motion graphics, and subtle 3D interactions.</p>
-      <div class="hero-actions">
-        <a href="#portfolio" class="btn primary">View Work</a>
-        <a href="#contact" class="btn secondary">Hire Me</a>
-      </div>
-    </div>
-    <div class="cube-wrap">
-      <div class="cube" aria-hidden="true">
-        <div class="face f1"><span>UI</span></div>
-        <div class="face f2"><span>3D</span></div>
-        <div class="face f3"><span>Code</span></div>
-        <div class="face f4"><span>Motion</span></div>
-        <div class="face f5"><span>Brand</span></div>
-        <div class="face f6"><span>XR</span></div>
-      </div>
-    </div>
-  </main>
-
-  <!-- About -->
-  <section id="about" class="container">
-    <h2 class="section-title">About</h2>
-    <p class="section-sub">I blend design, 3D, and engineering to build products that feel alive. Pixel precision, buttery motion, measured performance.</p>
-    <div class="about-grid">
-      <article class="about-card glass">
-        <h3>What I Do</h3>
-        <p>Interactive web apps, brand websites, product prototypes, and motion systems. I love combining WebGL, CSS 3D, and micro-interactions.</p>
-      </article>
-      <article class="about-card glass">
-        <h3>Stack</h3>
-        <p>HTML/CSS, JS/TS, React, Three.js, GSAP, Figma, Blender. Shipping accessible, responsive experiences with performance budgets.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- Portfolio -->
-  <section id="portfolio" class="container">
-    <h2 class="section-title">Selected Work</h2>
-    <p class="section-sub">Hover & move your cursor to tilt the cards in 3D.</p>
-
-    <div class="grid">
-      <article class="card glass" data-tilt>
-        <div class="bg-shape"></div>
-        <span class="tag">Web App</span>
-        <h3>Dashboard Nebula</h3>
-        <p>Analytics dashboard with 60fps charts & realtime updates.</p>
-      </article>
-      <article class="card glass large" data-tilt>
-        <div class="bg-shape"></div>
-        <span class="tag">3D</span>
-        <h3>Orbit Landing</h3>
-        <p>Three.js hero with interactive planets and parallax stars.</p>
-      </article>
-      <article class="card glass" data-tilt>
-        <div class="bg-shape"></div>
-        <span class="tag">Brand</span>
-        <h3>Crystal Identity</h3>
-        <p>Glassy identity system for a fintech startup.</p>
-      </article>
-      <article class="card glass" data-tilt>
-        <div class="bg-shape"></div>
-        <span class="tag">Motion</span>
-        <h3>Micro Motion Kit</h3>
-        <p>Motion guidelines & components for multi-platform apps.</p>
-      </article>
-      <article class="card glass large" data-tilt>
-        <div class="bg-shape"></div>
-        <span class="tag">Site</span>
-        <h3>Studio Portfolio</h3>
-        <p>High-polish studio site with glassmorphism and scroll scenes.</p>
-      </article>
-      <article class="card glass" data-tilt>
-        <div class="bg-shape"></div>
-        <span class="tag">Experiment</span>
-        <h3>Shader Toys</h3>
-        <p>GLSL shader experiments wrapped in WebGL panels.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- Motion Graphics -->
-  <section id="motion" class="container">
-    <h2 class="section-title">Motion Graphics</h2>
-    <p class="section-sub">A living style—snappy transitions, soft physics, and cohesive rhythms.</p>
-
-    <div class="marquee glass">
-      <div class="marquee-track" aria-hidden="true">
-        <span class="chip glass">Keyframes</span>
-        <span class="chip glass">Bezier Curves</span>
-        <span class="chip glass">Spring Physics</span>
-        <span class="chip glass">Parallax</span>
-        <span class="chip glass">Depth of Field</span>
-        <span class="chip glass">Easing</span>
-        <span class="chip glass">Masking</span>
-        <span class="chip glass">Particles</span>
-        <span class="chip glass">Stagger</span>
-        <span class="chip glass">Trail</span>
-        <!-- duplicate for seamless loop -->
-        <span class="chip glass">Keyframes</span>
-        <span class="chip glass">Bezier Curves</span>
-        <span class="chip glass">Spring Physics</span>
-        <span class="chip glass">Parallax</span>
-        <span class="chip glass">Depth of Field</span>
-        <span class="chip glass">Easing</span>
-        <span class="chip glass">Masking</span>
-        <span class="chip glass">Particles</span>
-        <span class="chip glass">Stagger</span>
-        <span class="chip glass">Trail</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact -->
-  <section id="contact" class="container">
-    <h2 class="section-title">Contact</h2>
-    <p class="section-sub">Have a project in mind? Let's build it together.</p>
-
-    <div class="glass" style="padding:22px; max-width: 760px; margin: 0 auto;">
-      <form id="contact-form" novalidate>
-        <div class="row">
-          <div style="flex:1; min-width: 220px;">
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" placeholder="Jane Doe" required />
-          </div>
-          <div style="flex:1; min-width: 220px;">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="jane@mail.com" required />
-          </div>
+    <!-- Start of header section
+	============================================= -->
+    <header id="bi-header" class="bi-header-section header-style-one">
+        <div class="bi-header-content">
+            <div class="bi-header-logo-main-menu d-flex align-items-center justify-content-between">
+                <div class="brand-logo">
+                    <a href="#"><img src="assets/img/logo/images-removebg-preview.png" alt=""></a>
+                </div>
+                <div class="bi-header-main-menu-cta-area d-flex align-items-center">
+                    <div class="bi-header-main-navigation">
+                        <nav class="main-navigation clearfix ul-li">
+                            <ul id="main-nav" class="nav navbar-nav clearfix">
+                                <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="gallery.html">Gallery</a></li>
+                                <li class="nav-item"><a class="nav-link" href="pdf.html">PDF's</a></li>
+                                <li class="nav-item"><a class="nav-link" href="compiler.html">Compiler</a></li>
+                                <li class="nav-item"><a class="nav-link" href="https://gietchat.netlify.app">Chat</a></li>
+				<li class="nav-item"><a class="nav-link" href="upload files.html">Upload files</a></li>
+				    <li class="nav-item"><a class="nav-link" href="https://giet-attendence.netlify.app/">Giet Attendence</a></li>
+                                <li class="nav-item"><a class="nav-link" href="Contact.html">Contact Us</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="bi-header-social">
+                        <a href="https://instagram.com/_.mr._.blk"> <i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/in/teja-manikanta-910542353/"> <i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://github.com/tejahack"> <i class="fab fa-github"></i></a>
+                    </div>
+                    <div class="bi-header-cta-btn-grp d-flex align-items-center">
+                        <div class="offcanves-btn navSidebar-button">
+                            <button><i class="fal fa-bars"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mobile_menu position-relative">
+                <div class="mobile_menu_button open_mobile_menu">
+                    <i class="fal fa-bars"></i>
+                </div>
+                <div class="mobile_menu_wrap">
+                    <div class="mobile_menu_overlay open_mobile_menu"></div>
+                    <div class="mobile_menu_content">
+                        <div class="mobile_menu_close open_mobile_menu">
+                            <i class="fal fa-times"></i>
+                        </div>
+                        <div class="m-brand-logo">
+                            <a href="%21.html#"><img src="assets/img/logo/logo2.png" alt=""></a>
+                        </div>
+                        <div class="mobile-search-bar position-relative">
+                            <form action="#">
+                                <input type="text" name="search" placeholder="Keywords">
+                                <button><i class="fal fa-search"></i></button>
+                            </form>
+                        </div>
+                        <nav class="mobile-main-navigation main-navigation  clearfix ul-li">
+                            <ul class="nav navbar-nav clearfix">
+                                <li><a href="index.html">Home</a></li>
+                                <li><a href="gallery.html">Gallery</a></li>
+                                <li><a href="pdf.html">PDF's</a></li>
+                                <li><a href="websites.html">Websites</a></li>
+                                <li><a href="compiler.html">Compiler</a></li>
+                                <li><a href="https://gietchat.netlify.app">Chatting Application</a></li>
+				<li><a href="upload files.html">Upload Files</a></li>
+				<li><a href="https://giet-attendence.netlify.app/">Giet Attendence</a></li>
+				<li><a href="Contact.html">Contact Us</a></li>
+                            </ul>
+                        </nav>
+                        <div class="bi-mobile-header-social text-center">
+                            <li><a href="https://www.linkedin.com/in/teja-manikanta-910542353/"><i class="fab fa-linkedin"></i> Linked In</a></li>
+                            <li><a href="https://github.com/tejahack"><i class="fab fa-github"></i> Github</a></li>
+                            <li><a href="https://www.instagram.com/_.mr._.blk/"><i class="fab fa-instagram"></i> Instagram</a></li>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Mobile-Menu -->
+            </div>
         </div>
-        <div>
-          <label for="message">Message</label>
-          <textarea id="message" name="message" placeholder="Tell me about your project…" required></textarea>
+    </header>
+    <!-- Sidebar sidebar Item -->
+    <div class="xs-sidebar-group info-group">
+        <div class="xs-overlay xs-bg-black">
+            <div class="row loader-area">
+                <div class="col-3 preloader-wrap">
+                    <div class="loader-bg"></div>
+                </div>
+                <div class="col-3 preloader-wrap">
+                    <div class="loader-bg"></div>
+                </div>
+                <div class="col-3 preloader-wrap">
+                    <div class="loader-bg"></div>
+                </div>
+                <div class="col-3 preloader-wrap">
+                    <div class="loader-bg"></div>
+                </div>
+            </div>
         </div>
-        <div class="row" style="align-items: center; justify-content: space-between;">
-          <button type="submit" class="btn primary">Send Message</button>
-          <span id="status" class="status" role="status" aria-live="polite"></span>
+        <div class="xs-sidebar-widget" data-background="assets/img/bg/texture.html">
+            <div class="sidebar-widget-container">
+                <div class="widget-heading">
+                    <a href="#" class="close-side-widget text-uppercase">
+                        <i class="fal fa-times"></i> Close
+                    </a>
+                </div>
+                <div class="sidebar-textwidget">
+
+                    <!-- Sidebar Info Content -->
+                    <div class="sidebar-info-contents headline pera-content">
+                        <div class="content-inner">
+                            <div class="sidebar-logo">
+                                <a href="#"><img src="assets/img/logo/logo2.png" alt=""></a>
+                            </div>
+                            <div class="sidebar-menu ul-li-block">
+                                <ul>
+                                    <li><a href="index.html"><i class="fal fa-home"></i> Home </a></li>
+                                    <li><a href="gallery.html"><i class="fal fa-chevron-up"></i> Gallery </a></li>
+                                    <li><a href="pdf.html"><i class="fal fa-envelope"></i> PDF's </a></li>
+                                    <li><a href="websites.html"><i class="fal fa-times"></i>Websites</a></li>
+                                    <li><a href="https://gietchat.netlify.app"><i class="fal fa-users"></i> Chat </a></li>
+                                    <li><a href="compiler.html"><i class="fal fa-search"></i> Compiler </a></li>
+                                    <li><a href="upload files.html"><i class="fal fa-times"></i> Upload Files </a></li>
+				    <li><a href="https://giet-attendence.netlify.app/"><i class="fal fa-users"></i>Giet Attendence</a></li>
+				    <li><a href="Contact.html"><i class="fal fa-envelope"></i> Contact </a></li>
+                                </ul>
+                            </div>
+                            <div class="sidebar-social ul-li-block">
+                                <span>Social:</span>
+                                <ul>
+
+                                    <li><a href="https://www.linkedin.com/in/teja-manikanta-910542353/"><i class="fab fa-linkedin"></i> Linked In</a></li>
+                                    <li><a href="https://github.com/tejahack"><i class="fab fa-github"></i> Github</a></li>
+                                    <li><a href="https://www.instagram.com/_.mr._.blk/"><i class="fab fa-instagram"></i> Instagram</a></li>
+                                </ul>
+                            </div>
+                            <div class="sidebar-copyright text-center">
+                                2025 Teja. All rights reserved.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </form>
     </div>
-  </section>
 
-  <footer>
-    © <span id="year"></span> Your Name. Built with glass, code, and care.
-  </footer>
+    <!-- End of header section
+	============================================= -->
+    <div data-bs-spy="scroll" data-bs-target=".main-navigation" data-bs-smooth-scroll="true">
+        <div class="top-bg-area" data-background="assets/img/bg/top-bg.jpg">
+            <!-- Start of Slider section
+	============================================= -->
+            <section id="bi-slider" class="bi-slider-section">
+                <div class="bi-main-slider-section position-relative">
+                    <div class="bi-main-slider-area position-relative" data-background="assets/img/slider/slide1.png">
+                        <div class="bi-main-slider swiper-container">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <div class="bi-main-slide-item position-relative">
+                                        <div class="container">
+                                            <div class="bi-main-slide-text-img-content d-flex align-items-end">
+                                                <div class="bi-slide-img-area position-relative">
+                                                    <div class="bi-slide-img">
+                                                        <img src="assets/img/slider/slide_img_2.png" alt="">
+                                                    </div>
+                                                    <div class="bi-slide-text-img position-absolute">
+                                                        <img src="assets/img/slider/slide_text_5.png" alt="">
+                                                    </div>
+                                                    <div class="bi-slide-img-arrow position-absolute">
+                                                        <img src="assets/img/slider/slide_arrow_3.png" alt="">
+                                                    </div>
+                                                </div>
+                                                <div class="bi-slide-text-area headline ul-li-block">
+                                                    <h1>Smooth</h1>
+                                                    <h2 class="b-strock-font">
+                                                        Development</h2>
+                                                    <ul>
+                                                        <li>Learning</li>
+                                                        <li>Preparation For Exams</li>
+                                                        <li>Growing Knowledge</li>
+                                                    </ul>
+                                                    <div class="bi-btn-1 bi-btn-area text-uppercase">
+                                                        <a class="bi-btn-main  bi-btn-hover bi-btn-item" href="pdf.html"> <span></span> Get Services</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="side-shape position-absolute"><img src="assets/img/slider/slide_shape_4.png" alt=""></span>
+                                    </div>
+                                </div>
+                                <div class="swiper-slide">
+                                    <div class="bi-main-slide-item position-relative">
+                                        <div class="container">
+                                            <div class="bi-main-slide-text-img-content d-flex align-items-end">
+                                                <div class="bi-slide-img-area position-relative">
+                                                    <div class="bi-slide-img">
+                                                        <img src="assets/img/slider/slide_img_2.png" alt="">
+                                                    </div>
+                                                    <div class="bi-slide-text-img position-absolute">
+                                                        <img src="assets/img/slider/slide_text_5.png" alt="">
+                                                    </div>
+                                                    <div class="bi-slide-img-arrow position-absolute">
+                                                        <img src="assets/img/slider/slide_arrow_3.png" alt="">
+                                                    </div>
+                                                </div>
+                                                <div class="bi-slide-text-area headline ul-li-block">
+                                                    <h1>Smooth</h1>
+                                                    <h2 class="b-strock-font">
+                                                       Gallery</h2>
+                                                    <ul>
+                                                        <li>Places</li>
+                                                        <li>Events</li>
+                                                        <li>In Our College</li>
+                                                    </ul>
+                                                    <div class="bi-btn-1 bi-btn-area text-uppercase">
+                                                        <a class="bi-btn-main  bi-btn-hover bi-btn-item" href="gallery.html"> <span></span> Get Services</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="side-shape position-absolute"><img src="assets/img/slider/slide_shape_4.png" alt=""></span>
+                                    </div>
+                                </div>
+                                <div class="swiper-slide">
+                                    <div class="bi-main-slide-item position-relative">
+                                        <div class="container">
+                                            <div class="bi-main-slide-text-img-content d-flex align-items-end">
+                                                <div class="bi-slide-img-area position-relative">
+                                                    <div class="bi-slide-img">
+                                                        <img src="assets/img/slider/slide_img_2.png" alt="">
+                                                    </div>
+                                                    <div class="bi-slide-text-img position-absolute">
+                                                        <img src="assets/img/slider/slide_text_5.png" alt="">
+                                                    </div>
+                                                    <div class="bi-slide-img-arrow position-absolute">
+                                                        <img src="assets/img/slider/slide_arrow_3.png" alt="">
+                                                    </div>
+                                                </div>
+                                                <div class="bi-slide-text-area headline ul-li-block">
+                                                    <h1>Smooth</h1>
+                                                    <h2 class="b-strock-font">
+                                                        Websites</h2>
+                                                    <ul>
+                                                        <li>Learning</li>
+                                                        <li>Preparation For Exams</li>
+                                                        <li>Growing Knowledge</li>
+                                                    </ul>
+                                                    <div class="bi-btn-1 bi-btn-area text-uppercase">
+                                                        <a class="bi-btn-main  bi-btn-hover bi-btn-item" href="websites.html"> <span></span> Get Services</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="side-shape position-absolute"><img src="assets/img/slider/slide_shape_4.png" alt=""></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bi-carousel-arrow-next-prev  position-absolute">
+                            <div class="bi-slider-arrow d-flex justify-content-center align-items-center bi-main-button-prev"><i class="far fa-long-arrow-left"></i></div>
+                            <div class="bi-slider-arrow d-flex justify-content-center align-items-center bi-main-button-next"><i class="far fa-long-arrow-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- End of Slider  section
+	============================================= -->
 
-  <!-- EmailJS SDK -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-  <script>
-    // Update year
-    document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Smooth scroll for internal links
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        const id = a.getAttribute('href');
-        const el = document.querySelector(id);
-        if (el) {
-          e.preventDefault();
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    });
 
-    // 3D tilt effect on cards
-    const tiltCards = document.querySelectorAll('[data-tilt]');
-    const clamp = (n, min, max) => Math.max(min, Math.min(n, max));
+            <!-- Start of Footer  section
+	============================================= -->
+            <footer id="bi-footer" class="bi-footer-section" data-background="assets/img/bg/footer-bg.jpg">
+                <div class="bi-footer-cta position-relative">
+                    <div class="container">
+                        <div class="bi-footer-cta-content headline d-flex align-items-center  justify-content-between flex-wrap" data-background="assets/img/bg/cta-bg.jpg">
+                            <div class="bi-footer-cta-text">
+                                <h3>Looking for a Design Parner?</h3>
+                            </div>
+                            <div class="bi-cta-btn">
+                                <div class="bi-btn-1  bi-btn-area text-uppercase">
+                                    <a class="bi-btn-main  bi-btn-hover bi-btn-item" href="Contact.html"> <span></span> Contact Us</a>
+                                </div>
 
-    tiltCards.forEach(card => {
-      const strength = 12; // degrees
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width;   // 0..1
-        const py = (e.clientY - r.top) / r.height;  // 0..1
-        const rx = clamp((0.5 - py) * strength, -strength, strength);
-        const ry = clamp((px - 0.5) * strength, -strength, strength);
-        card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = 'rotateX(0) rotateY(0)';
-      });
-    });
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bi-footer-widget-content">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <div class="bi-footer-widget headline pera-content ul-li-block">
+                                    <div class="about-widget">
+                                        <h3>Working Together Ideas come to life</h3>
+                                        <p>
+                                            No matter how big your company is, as you expand and reach new highs you’ll want an agency to have your back. One with a process
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="bi-footer-widget headline pera-content ul-li-block">
+                                    <div class="menu-widget">
+                                        <h3 class="widget-title">Services</h3>
+                                        <ul>
+                                            <li><a href="index.html">Home</a></li>
+                                            <li><a href="gallery.html">Gallery</a></li>
+                                            <li><a href="pdf.html">PDF's</a></li>
+                                            <li><a href="websites.html">Websites</a></li>
+                                            <li><a href="compiler.html">Compiler </a></li>
+                                            <li><a href="https://gietchat.netlify.app">Chatting App</a></li>
+                                            <li><a href="Contact.html">Contact</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+			     <div class="col-lg-2">
+                                <div class="bi-footer-widget headline pera-content ul-li-block">
+                                    <div class="menu-widget">
+                                        <h3 class="widget-title">Projects</h3>
+                                        <ul>
+                                            <li><a href="upload files.html">Upload Files</a></li>
+					    <li><a href="https://giet-attendence.netlify.app/">Giet Atendence</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bi-footer-social">
+                    <div class="container">
+                        <div class="bi-footer-social-content ul-li">
+                            <ul>
 
-    // Contact Form Handler with EmailJS
-    (function() {
-        emailjs.init("9b7m3xeOv027u8o-e"); // Replace with your EmailJS public key
-    })();
+                                <li><a href="https://www.linkedin.com/in/teja-manikanta-910542353/"><i class="fab fa-linkedin-in"></i> Linked In    </a></li>
+                                <li><a href="https://github.com/tejahack"><i class="fab fa-github"></i> Github  </a></li>
+                                <li><a href="https://www.instagram.com/_.mr._.blk/"><i class="fab fa-instagram"></i> Instagram </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="bi-footer-logo-area">
+                    <div class="container">
+                        <div class="bi-footer-logo">
+                            <div class="brand-logo text-center">
+                                <a href="#"><img src="assets/img/logo/logo2.png" alt=""></a>
+                            </div>
+                            <div class="logo-mail text-center headline">
+                                <h3><a href="#">mteja819@gmail.com</a></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bi-footer-copyright text-center">
+                    2025 Teja. All rights reserved.
+                </div>
+            </footer>
+            <!-- End of Footer  section
+	============================================= -->
 
-    const form = document.getElementById('contact-form');
-    const statusMsg = document.getElementById('status');
-    const submitBtn = form.querySelector('button[type="submit"]');
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Basic validation
-        if (form.name.value === '' || form.email.value === '' || form.message.value === '') {
-            statusMsg.textContent = "Please fill out all fields.";
-            statusMsg.style.color = "rgb(var(--bg1))";
-            return;
-        }
-
-        const serviceID = 'service_3tcve1u'; // Replace with your EmailJS Service ID
-        const templateID = 'template_q7ou8mp'; // Replace with your EmailJS Template ID
-
-        statusMsg.textContent = "Sending...";
-        statusMsg.style.color = "rgb(var(--muted))";
-        submitBtn.disabled = true;
-
-        emailjs.sendForm(serviceID, templateID, this)
-            .then(() => {
-                statusMsg.textContent = "Message sent successfully!";
-                statusMsg.style.color = "rgb(var(--bg3))";
-                submitBtn.disabled = false;
-                form.reset();
-                setTimeout(() => {
-                    statusMsg.textContent = "";
-                }, 5000);
-            }, (err) => {
-                statusMsg.textContent = "Failed to send. Please try again.";
-                statusMsg.style.color = "rgb(var(--bg1))";
-                submitBtn.disabled = false;
-                console.error('EmailJS Error:', JSON.stringify(err));
-            });
-    });
-
-  </script>
+            <!-- For Js Library -->
+            <script src="assets/js/jquery-3.6.0.min.js"></script>
+            <script src="assets/js/bootstrap.bundle.min.js"></script>
+            <script src="assets/js/swiper-bundle.min.js"></script>
+            <script src="assets/js/appear.js"></script>
+            <script src="assets/js/counter.js"></script>
+            <script src="assets/js/gsap.min.js"></script>
+            <script src="assets/js/knob.js"></script>
+            <script src="assets/js/jquery.magnific-popup.min.js"></script>
+            <script src="assets/js/jquery.counterup.min.js"></script>
+            <script src="assets/js/waypoints.min.js"></script>
+            <script src="assets/js/parallax.min.js"></script>
+            <script src="assets/js/ScrollTrigger.min.js"></script>
+            <script src="assets/js/ScrollToPlugin.min.js"></script>
+            <script src="assets/js/ScrollSmoother.min.js"></script>
+            <script src="assets/js/SplitText.min.js"></script>
+            <script src="assets/js/jquery.filterizr.js"></script>
+            <script src="assets/js/imagesloaded.pkgd.min.js"></script>
+            <script src="assets/js/hover-revel.js"></script>
+            <script src="assets/js/split-type.min.js"></script>
+            <script src="assets/js/parallax-scroll.js"></script>
+            <script src="assets/js/jquery.marquee.min.js"></script>
+            <script src="assets/js/wow.min.js"></script>
+            <script src="assets/js/jquery.meanmenu.min.js"></script>
+            <script src="assets/js/tilt.jquery.min.js"></script>
+            <script src="assets/js/matter.min.js"></script>
+            <script src="assets/js/script.js"></script>
 </body>
+
 </html>
