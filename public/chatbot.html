@@ -2,13 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Teja GPT</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
         body {
             font-family: 'Inter', sans-serif;
             background-color: #1e1e1e;
@@ -57,9 +62,50 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100%;
+                z-index: 40;
+                transition: left 0.3s ease-in-out;
+                width: 288px; /* w-72 */
+            }
+            .sidebar.open {
+                left: 0;
+            }
+            #content-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 39;
+                display: none;
+            }
+            #content-overlay.active {
+                display: block;
+            }
+            #menu-btn {
+                display: block;
+            }
+        }
+        @media (min-width: 769px) {
+            #menu-btn {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="overflow-hidden">
+    <!-- Mobile Hamburger Menu Button -->
+    <button id="menu-btn" class="fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-800 text-white hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+    <div id="content-overlay"></div>
 
     <div id="app-container" class="flex h-screen">
 
@@ -91,7 +137,7 @@
         <!-- Main App (Hidden by default) -->
         <div id="main-app" class="hidden w-full h-full flex">
             <!-- Sidebar -->
-            <aside class="sidebar w-72 flex-shrink-0 flex flex-col p-4 border-r border-gray-700">
+            <aside id="sidebar" class="sidebar w-72 flex-shrink-0 flex flex-col p-4 border-r border-gray-700">
                 <div class="flex justify-between items-center mb-4">
                     <h1 class="text-2xl font-bold">History</h1>
                     <button id="new-chat-btn" class="p-2 rounded-md hover:bg-gray-600" title="New Chat">
@@ -140,6 +186,10 @@
                         <div><button type="submit" class="btn-primary text-white py-2 px-4 rounded-md">Update Profile</button></div>
                     </form>
                 </div>
+                 <!-- Footer -->
+                <footer class="p-4 text-center text-xs text-gray-500">
+                    © 2025 Teja GPT. All rights reserved.
+                </footer>
             </main>
         </div>
     </div>
@@ -157,13 +207,11 @@
 
     <script>
         // === SUPABASE & OPENROUTER SETUP ===
-        // IMPORTANT: Replace these placeholder values with your actual Supabase and OpenRouter keys.
-        // The "Invalid URL" error occurs if SUPABASE_URL is not a valid URL string.
-       // === SUPABASE & OPENROUTER SETUP ===
         const SUPABASE_URL = 'https://bugyqxwahckhaocwqpgo.supabase.co'; // <-- IMPORTANT: Replace
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1Z3lxeHdhaGNraGFvY3dxcGdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0MDQ2MDMsImV4cCI6MjA3MDk4MDYwM30.tidAr93dNAkvSyCXLi6DMImbecVteO_rCfKNj9rFiqw'; // <-- IMPORTANT: Replace
         const OPENROUTER_API_KEY = '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'; // <-- IMPORTANT: Replace
         const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+     
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -180,6 +228,7 @@
         const chatSection = document.getElementById('chat-section');
         const profileSection = document.getElementById('profile-section');
         const profileForm = document.getElementById('profile-form');
+        const sidebar = document.getElementById('sidebar');
         const sidebarAvatar = document.getElementById('sidebar-avatar');
         const sidebarUsername = document.getElementById('sidebar-username');
         const sidebarEmail = document.getElementById('sidebar-email');
@@ -190,6 +239,8 @@
         const userProfileDisplay = document.getElementById('user-profile-display');
         const backToChatBtn = document.getElementById('back-to-chat-btn');
         const confirmModal = document.getElementById('confirm-modal');
+        const menuBtn = document.getElementById('menu-btn');
+        const contentOverlay = document.getElementById('content-overlay');
 
         // === STATE MANAGEMENT ===
         let isSignUp = false;
@@ -204,16 +255,15 @@
         const authCanvas = document.getElementById('auth-canvas');
 
         function init3DAnimation() {
+            authCanvas.style.display = 'block';
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ canvas: authCanvas, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-
             const geometry = new THREE.IcosahedronGeometry(2, 1);
             const material = new THREE.MeshBasicMaterial({ color: 0x5a5a5a, wireframe: true });
             sphere = new THREE.Mesh(geometry, material);
             scene.add(sphere);
-
             camera.position.z = 5;
             animate();
         }
@@ -250,11 +300,9 @@
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const btnText = submitBtn.querySelector('.btn-text');
             const loader = submitBtn.querySelector('.loader');
-
             submitBtn.disabled = true;
             btnText.classList.add('hidden');
             loader.classList.remove('hidden');
-
             try {
                 const { error } = isSignUp ? await _supabase.auth.signUp({ email, password }) : await _supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
@@ -290,6 +338,7 @@
             [chatSection, profileSection].forEach(s => s.classList.add('hidden'));
             if (section === 'chat') chatSection.classList.remove('hidden');
             else if (section === 'profile') profileSection.classList.remove('hidden');
+            closeSidebar();
         };
         userProfileDisplay.addEventListener('click', (e) => { e.preventDefault(); navigateTo('profile'); });
         backToChatBtn.addEventListener('click', (e) => { e.preventDefault(); navigateTo('chat'); });
@@ -305,6 +354,18 @@
             if (confirmCallback) confirmCallback();
             confirmModal.classList.add('hidden');
         });
+
+        // Mobile Sidebar Logic
+        const openSidebar = () => {
+            sidebar.classList.add('open');
+            contentOverlay.classList.add('active');
+        };
+        const closeSidebar = () => {
+            sidebar.classList.remove('open');
+            contentOverlay.classList.remove('active');
+        };
+        menuBtn.addEventListener('click', openSidebar);
+        contentOverlay.addEventListener('click', closeSidebar);
 
         // === PROFILE MANAGEMENT ===
         const fetchUserProfile = async (user) => {
@@ -397,6 +458,7 @@
                 clearChatBtn.disabled = true;
             }
             renderChatList();
+            closeSidebar();
         };
 
         newChatBtn.addEventListener('click', async () => {
@@ -416,10 +478,9 @@
                     console.error("Error clearing chat:", error);
                 } else {
                     chatMessages.innerHTML = '';
-                    // Optionally, delete the chat itself
                     const { error: deleteChatError } = await _supabase.from('chats').delete().eq('id', activeChatId);
                     if (deleteChatError) console.error("Error deleting chat:", deleteChatError);
-                    else await fetchChats(); // Refresh chat list
+                    else await fetchChats();
                 }
             });
         });
@@ -457,7 +518,6 @@
 
             addMessageToUI({ content: userMessageContent, role: 'user' });
             
-            // Save user message in the background
             _supabase.from('messages').insert({ content: userMessageContent, user_id: currentUser.id, role: 'user', chat_id: activeChatId }).then(({error}) => {
                 if (error) console.error("Error saving user message:", error);
             });
@@ -491,6 +551,7 @@
 
                 removeTypingIndicator();
                 addMessageToUI({ content: aiContent, role: 'assistant' });
+                
                 _supabase.from('messages').insert({ content: aiContent, user_id: currentUser.id, role: 'assistant', chat_id: activeChatId });
             } catch (err) {
                 console.error("OpenRouter API Error:", err);
