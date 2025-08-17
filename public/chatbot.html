@@ -1,585 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Teja GPT</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TejaGPT — AI Chat</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-        .sidebar { background-color: #2d2d2d; }
-        .chat-area { background-color: #1e1e1e; }
-        .input-area { background-color: #252525; }
-        .btn-primary { background-color: #4a4a4a; }
-        .btn-primary:hover { background-color: #5a5a5a; }
-        .btn-danger { background-color: #991b1b; }
-        .btn-danger:hover { background-color: #b91c1c; }
-        .form-input { background-color: #3c3c3c; border-color: #555; }
-        .message { background-color: #333333; }
-        .message.own { background-color: #004d40; }
-        .chat-item.active { background-color: #4a4a4a; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #2d2d2d; }
-        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #666; }
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); display: flex;
-            align-items: center; justify-content: center; z-index: 50;
-        }
-        .modal-content {
-            background-color: #2d2d2d; padding: 2rem; border-radius: 0.5rem;
-            max-width: 400px; width: 90%; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        #auth-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; display: block;
-        }
-        .auth-form-container {
-            position: relative; z-index: 1;
-        }
-        .loader {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #5a5a5a;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Mobile specific styles */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -100%;
-                top: 0;
-                height: 100%;
-                z-index: 40;
-                transition: left 0.3s ease-in-out;
-                width: 288px; /* w-72 */
-            }
-            .sidebar.open {
-                left: 0;
-            }
-            #content-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0,0,0,0.5);
-                z-index: 39;
-                display: none;
-            }
-            #content-overlay.active {
-                display: block;
-            }
-            #menu-btn {
-                display: block;
-            }
-        }
-        @media (min-width: 769px) {
-            #menu-btn {
-                display: none;
-            }
-        }
-    </style>
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js (3D login background) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <!-- Markdown + Sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+
+  <style>
+    html, body { height: 100%; overflow: hidden; background: #0b1220; color: #e5e7eb; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
+    #chat-messages::-webkit-scrollbar { width: 10px; }
+    #chat-messages::-webkit-scrollbar-thumb { background: #3f4657; border-radius: 10px; }
+    .glass { background: rgba(17,24,39,.7); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.08); }
+    .tilt { transform-style: preserve-3d; transition: transform .18s ease-out, box-shadow .25s ease; }
+    .tilt:hover { box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+    .bubble { max-width: 72ch; border-radius: 18px; padding: .75rem 1rem; word-wrap: break-word; }
+    .bubble code { background:#111827; padding:.1rem .35rem; border-radius:.35rem; }
+    .bubble pre { background:#111827; padding:1rem; border-radius:.5rem; overflow:auto; }
+    .typing-dot { width: 8px; height: 8px; border-radius: 9999px; background:#9aa0ae; display:inline-block; animation: blink 1.2s infinite; }
+    .typing-dot:nth-child(2){ animation-delay:.2s } .typing-dot:nth-child(3){ animation-delay:.4s }
+    @keyframes blink { 0%, 80%, 100% { opacity:.2 } 40% { opacity:1 } }
+    canvas#auth3d { position: fixed; inset: 0; z-index: 0; }
+    #auth-card { position: relative; z-index: 1; }
+  </style>
 </head>
-<body class="overflow-hidden">
-    <!-- Mobile Hamburger Menu Button -->
-    <button id="menu-btn" class="fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-800 text-white hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-    <div id="content-overlay"></div>
+<body>
 
-    <div id="app-container" class="flex h-screen">
+  <!-- ========= AUTH (3D) ========= -->
+  <section id="auth-screen" class="w-full h-full flex items-center justify-center p-4">
+    <canvas id="auth3d"></canvas>
 
-        <!-- Auth Section -->
-        <div id="auth-section" class="w-full h-full flex items-center justify-center p-4 relative">
-            <canvas id="auth-canvas"></canvas>
-            <div class="w-full max-w-md space-y-8 auth-form-container">
-                <div>
-                    <h2 id="auth-title" class="mt-6 text-center text-3xl font-extrabold text-white">
-                        Sign in to your account
-                    </h2>
-                </div>
-                <form id="auth-form" class="mt-8 space-y-6" action="#" method="POST">
-                    <div class="rounded-md shadow-sm -space-y-px">
-                        <div><input id="email" name="email" type="email" autocomplete="email" required class="form-input appearance-none rounded-none relative block w-full px-3 py-2 border placeholder-gray-500 text-white rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address"></div>
-                        <div><input id="password" name="password" type="password" autocomplete="current-password" required class="form-input appearance-none rounded-none relative block w-full px-3 py-2 border placeholder-gray-500 text-white rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password"></div>
-                    </div>
-                    <div>
-                        <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-75">
-                            <span class="btn-text">Sign In</span>
-                            <div class="loader hidden"></div>
-                        </button>
-                    </div>
-                </form>
-                <p class="text-center text-sm"><a href="#" id="toggle-auth-mode" class="font-medium text-indigo-400 hover:text-indigo-300">Don't have an account? Sign Up</a></p>
-            </div>
+    <div id="auth-card" class="tilt glass w-full max-w-md rounded-2xl p-8">
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-extrabold tracking-tight">Welcome to <span class="text-indigo-400">TejaGPT</span></h1>
+        <p class="text-sm text-gray-400 mt-2">Sign in or create an account to continue</p>
+      </div>
+
+      <div class="space-y-4">
+        <input id="email" type="email" placeholder="Email"
+               class="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <input id="password" type="password" placeholder="Password"
+               class="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <div class="flex gap-3">
+          <button id="login-btn"  class="flex-1 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition font-semibold">Sign in</button>
+          <button id="signup-btn" class="flex-1 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition font-semibold">Sign up</button>
         </div>
-
-        <!-- Main App (Hidden by default) -->
-        <div id="main-app" class="hidden w-full h-full flex">
-            <!-- Sidebar -->
-            <aside id="sidebar" class="sidebar w-72 flex-shrink-0 flex flex-col p-4 border-r border-gray-700">
-                <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-2xl font-bold">History</h1>
-                    <button id="new-chat-btn" class="p-2 rounded-md hover:bg-gray-600" title="New Chat">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
-                </div>
-                <div id="chat-list" class="flex-1 space-y-2 overflow-y-auto">
-                    <!-- Chat list will be populated here -->
-                </div>
-                <div class="mt-auto">
-                    <div id="user-profile-display" class="flex items-center mb-4 cursor-pointer p-2 rounded-md hover:bg-gray-600" title="Edit Profile">
-                        <img id="sidebar-avatar" src="https://placehold.co/40x40/2d2d2d/e0e0e0?text=U" class="w-10 h-10 rounded-full mr-3">
-                        <div>
-                            <p id="sidebar-username" class="font-semibold">Loading...</p>
-                            <p id="sidebar-email" class="text-xs text-gray-400"></p>
-                        </div>
-                    </div>
-                    <button id="logout-btn" class="w-full btn-primary text-white py-2 px-4 rounded-md">Logout</button>
-                </div>
-            </aside>
-
-            <!-- Content Area -->
-            <main class="flex-1 flex flex-col">
-                <div id="chat-section" class="flex-1 flex flex-col">
-                    <div class="p-4 border-b border-gray-700 flex justify-between items-center">
-                        <h2 id="chat-title" class="text-xl font-bold">Select a chat to start</h2>
-                        <button id="clear-chat-btn" class="btn-danger text-white py-2 px-3 rounded-md flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>Clear Chat</button>
-                    </div>
-                    <div id="chat-messages" class="flex-1 p-6 overflow-y-auto"></div>
-                    <div class="input-area p-4 border-t border-gray-700">
-                        <form id="message-form" class="flex items-center">
-                            <input id="message-input" type="text" placeholder="Type your message..." class="form-input flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none px-4 py-2 rounded-lg" disabled>
-                            <button type="submit" class="ml-4 btn-primary text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:opacity-50" disabled>Send</button>
-                        </form>
-                    </div>
-                </div>
-                <div id="profile-section" class="hidden p-6 overflow-y-auto">
-                    <div class="flex items-center mb-6">
-                         <button id="back-to-chat-btn" class="p-2 rounded-full hover:bg-gray-600 mr-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>
-                         <h2 class="text-2xl font-bold">Edit Profile</h2>
-                    </div>
-                    <form id="profile-form" class="space-y-4 max-w-lg">
-                        <div><label for="username" class="block text-sm font-medium">Username</label><input type="text" id="username" class="form-input mt-1 block w-full rounded-md" required></div>
-                        <div><label for="website" class="block text-sm font-medium">Website</label><input type="url" id="website" class="form-input mt-1 block w-full rounded-md"></div>
-                        <div><label for="avatar_url" class="block text-sm font-medium">Avatar URL</label><input type="url" id="avatar_url" class="form-input mt-1 block w-full rounded-md"></div>
-                        <div><button type="submit" class="btn-primary text-white py-2 px-4 rounded-md">Update Profile</button></div>
-                    </form>
-                </div>
-                 <!-- Footer -->
-                <footer class="p-4 text-center text-xs text-gray-500">
-                    © 2025 Teja GPT. All rights reserved.
-                </footer>
-            </main>
-        </div>
+        <p id="auth-error" class="text-rose-400 text-sm text-center min-h-[1.25rem]"></p>
+      </div>
     </div>
-    
-    <div id="confirm-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h3 id="confirm-title" class="text-xl font-bold mb-4">Are you sure?</h3>
-            <p id="confirm-text" class="text-gray-300 mb-6">This action cannot be undone.</p>
-            <div class="flex justify-end space-x-4">
-                <button id="confirm-cancel-btn" class="btn-primary text-white py-2 px-4 rounded-md">Cancel</button>
-                <button id="confirm-ok-btn" class="btn-danger text-white py-2 px-4 rounded-md">Confirm</button>
-            </div>
+  </section>
+
+  <!-- ========= APP ========= -->
+  <section id="app-screen" class="hidden w-full h-full flex items-center justify-center p-4">
+    <div class="glass w-full max-w-5xl h-[86vh] rounded-2xl grid grid-rows-[auto_1fr_auto] overflow-hidden">
+      <!-- Header -->
+      <header class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-indigo-500/20 grid place-items-center">🤖</div>
+          <h2 class="font-semibold">TejaGPT Assistant</h2>
         </div>
+        <div class="flex items-center gap-2">
+          <button id="new-chat" class="px-3 py-2 text-sm rounded-lg bg-gray-700 hover:bg-gray-600">New chat</button>
+          <button id="logout-btn" class="px-3 py-2 text-sm rounded-lg bg-rose-600 hover:bg-rose-700">Logout</button>
+        </div>
+      </header>
+
+      <!-- Messages -->
+      <main id="chat-messages" class="overflow-y-auto p-5 space-y-4 bg-[#0b1220]"></main>
+
+      <!-- Composer -->
+      <form id="message-form" class="border-t border-white/10 p-3 flex gap-3 bg-[#0b1220]">
+        <input id="user-input" type="text" placeholder="Type your message…"
+               class="flex-1 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <button class="px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold">Send</button>
+      </form>
     </div>
+  </section>
 
-    <script>
-        // === SUPABASE & OPENROUTER SETUP ===
-        const SUPABASE_URL = 'https://bugyqxwahckhaocwqpgo.supabase.co'; // <-- IMPORTANT: Replace
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1Z3lxeHdhaGNraGFvY3dxcGdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0MDQ2MDMsImV4cCI6MjA3MDk4MDYwM30.tidAr93dNAkvSyCXLi6DMImbecVteO_rCfKNj9rFiqw'; // <-- IMPORTANT: Replace
-        const OPENROUTER_API_KEY = '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'; // <-- IMPORTANT: Replace
-        const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-     
-        const { createClient } = supabase;
-        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <script>
+    /* ===============================
+       CONFIG: ADD YOUR REAL KEYS HERE
+       =============================== */
+    const SUPABASE_URL       = "https://bugyqxwahckhaocwqpgo.supabase.co";        // e.g. https://xxxx.supabase.co
+    const SUPABASE_ANON_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1Z3lxeHdhaGNraGFvY3dxcGdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0MDQ2MDMsImV4cCI6MjA3MDk4MDYwM30.tidAr93dNAkvSyCXLi6DMImbecVteO_rCfKNj9rFiqw";   // anon public key
+    const OPENROUTER_API_KEY = "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";  // from https://openrouter.ai/keys
+    const OPENROUTER_MODEL   = "openai/gpt-oss-20b:free";       // pick any OpenRouter model you have access to
 
-        // === DOM ELEMENTS ===
-        const authSection = document.getElementById('auth-section');
-        const mainApp = document.getElementById('main-app');
-        const authForm = document.getElementById('auth-form');
-        const authTitle = document.getElementById('auth-title');
-        const toggleAuthModeLink = document.getElementById('toggle-auth-mode');
-        const logoutBtn = document.getElementById('logout-btn');
-        const messageForm = document.getElementById('message-form');
-        const messageInput = document.getElementById('message-input');
-        const chatMessages = document.getElementById('chat-messages');
-        const chatSection = document.getElementById('chat-section');
-        const profileSection = document.getElementById('profile-section');
-        const profileForm = document.getElementById('profile-form');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarAvatar = document.getElementById('sidebar-avatar');
-        const sidebarUsername = document.getElementById('sidebar-username');
-        const sidebarEmail = document.getElementById('sidebar-email');
-        const newChatBtn = document.getElementById('new-chat-btn');
-        const chatList = document.getElementById('chat-list');
-        const chatTitle = document.getElementById('chat-title');
-        const clearChatBtn = document.getElementById('clear-chat-btn');
-        const userProfileDisplay = document.getElementById('user-profile-display');
-        const backToChatBtn = document.getElementById('back-to-chat-btn');
-        const confirmModal = document.getElementById('confirm-modal');
-        const menuBtn = document.getElementById('menu-btn');
-        const contentOverlay = document.getElementById('content-overlay');
+    // Safety: warn if placeholders are not replaced
+    for (const [k,v] of Object.entries({SUPABASE_URL, SUPABASE_ANON_KEY, OPENROUTER_API_KEY})) {
+      if ((v||"").includes("YOUR_")) console.warn(`[config] Replace ${k} with your real value.`);
+    }
 
-        // === STATE MANAGEMENT ===
-        let isSignUp = false;
-        let currentUser = null;
-        let activeChatId = null;
-        let chats = [];
-        let confirmCallback = null;
-        let animationFrameId;
+    /* ===============================
+       SUPABASE INIT + AUTH FLOWS
+       =============================== */
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // === 3D ANIMATION LOGIC ===
-        let scene, camera, renderer, sphere;
-        const authCanvas = document.getElementById('auth-canvas');
+    const authScreen = document.getElementById("auth-screen");
+    const appScreen  = document.getElementById("app-screen");
+    const errorEl    = document.getElementById("auth-error");
 
-        function init3DAnimation() {
-            authCanvas.style.display = 'block';
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ canvas: authCanvas, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            const geometry = new THREE.IcosahedronGeometry(2, 1);
-            const material = new THREE.MeshBasicMaterial({ color: 0x5a5a5a, wireframe: true });
-            sphere = new THREE.Mesh(geometry, material);
-            scene.add(sphere);
-            camera.position.z = 5;
-            animate();
-        }
+    const emailEl    = document.getElementById("email");
+    const passEl     = document.getElementById("password");
 
-        function animate() {
-            animationFrameId = requestAnimationFrame(animate);
-            sphere.rotation.x += 0.001;
-            sphere.rotation.y += 0.001;
-            renderer.render(scene, camera);
-        }
+    document.getElementById("login-btn").addEventListener("click", async () => {
+      errorEl.textContent = "";
+      const { data, error } = await sb.auth.signInWithPassword({
+        email: emailEl.value.trim(),
+        password: passEl.value
+      });
+      if (error) { errorEl.textContent = error.message; return; }
+      showApp();
+    });
 
-        window.addEventListener('resize', () => {
-            if (renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        });
+    document.getElementById("signup-btn").addEventListener("click", async () => {
+      errorEl.textContent = "";
+      const { data, error } = await sb.auth.signUp({
+        email: emailEl.value.trim(),
+        password: passEl.value
+      });
+      if (error) { errorEl.textContent = error.message; return; }
+      errorEl.textContent = "✅ Check your email to confirm. Then sign in.";
+    });
 
-        // === AUTHENTICATION LOGIC ===
-        const toggleAuthMode = () => {
-            isSignUp = !isSignUp;
-            const btnText = authForm.querySelector('.btn-text');
-            authTitle.textContent = isSignUp ? 'Create a new account' : 'Sign in to your account';
-            btnText.textContent = isSignUp ? 'Sign Up' : 'Sign In';
-            toggleAuthModeLink.textContent = isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up";
-        };
-        toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); toggleAuthMode(); });
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await sb.auth.signOut();
+      showAuth();
+    });
 
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = e.target.email.value;
-            const password = e.target.password.value;
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const loader = submitBtn.querySelector('.loader');
-            submitBtn.disabled = true;
-            btnText.classList.add('hidden');
-            loader.classList.remove('hidden');
-            try {
-                const { error } = isSignUp ? await _supabase.auth.signUp({ email, password }) : await _supabase.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            } finally {
-                submitBtn.disabled = false;
-                btnText.classList.remove('hidden');
-                loader.classList.add('hidden');
-            }
-        });
+    // Persist session
+    sb.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) showApp(); else showAuth();
+    });
 
-        logoutBtn.addEventListener('click', () => _supabase.auth.signOut());
+    function showAuth() {
+      appScreen.classList.add("hidden");
+      authScreen.classList.remove("hidden");
+    }
+    function showApp() {
+      authScreen.classList.add("hidden");
+      appScreen.classList.remove("hidden");
+      // optional: load history from your DB table if you create one later
+    }
 
-        // === UI MANAGEMENT ===
-        const showMainApp = () => {
-            authSection.classList.add('hidden');
-            mainApp.classList.remove('hidden');
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-            }
-        };
-        const showAuth = () => {
-            mainApp.classList.add('hidden');
-            authSection.classList.remove('hidden');
-            if (!animationFrameId) {
-                init3DAnimation();
-            }
-        };
-        
-        const navigateTo = (section) => {
-            [chatSection, profileSection].forEach(s => s.classList.add('hidden'));
-            if (section === 'chat') chatSection.classList.remove('hidden');
-            else if (section === 'profile') profileSection.classList.remove('hidden');
-            closeSidebar();
-        };
-        userProfileDisplay.addEventListener('click', (e) => { e.preventDefault(); navigateTo('profile'); });
-        backToChatBtn.addEventListener('click', (e) => { e.preventDefault(); navigateTo('chat'); });
-        
-        const showConfirmModal = (title, text, callback) => {
-            document.getElementById('confirm-title').textContent = title;
-            document.getElementById('confirm-text').textContent = text;
-            confirmCallback = callback;
-            confirmModal.classList.remove('hidden');
-        };
-        document.getElementById('confirm-cancel-btn').addEventListener('click', () => confirmModal.classList.add('hidden'));
-        document.getElementById('confirm-ok-btn').addEventListener('click', () => {
-            if (confirmCallback) confirmCallback();
-            confirmModal.classList.add('hidden');
-        });
+    /* ===============================
+       CHAT UI + OPENROUTER
+       =============================== */
+    const chatEl    = document.getElementById("chat-messages");
+    const formEl    = document.getElementById("message-form");
+    const inputEl   = document.getElementById("user-input");
+    const newChatEl = document.getElementById("new-chat");
 
-        // Mobile Sidebar Logic
-        const openSidebar = () => {
-            sidebar.classList.add('open');
-            contentOverlay.classList.add('active');
-        };
-        const closeSidebar = () => {
-            sidebar.classList.remove('open');
-            contentOverlay.classList.remove('active');
-        };
-        menuBtn.addEventListener('click', openSidebar);
-        contentOverlay.addEventListener('click', closeSidebar);
+    let conversation = [
+      { role: "system", content: "You are a concise, helpful assistant. Format with Markdown when appropriate." }
+    ];
 
-        // === PROFILE MANAGEMENT ===
-        const fetchUserProfile = async (user) => {
-            if (!user) return null;
-            const { data, error } = await _supabase.from('profiles').select(`username, website, avatar_url`).eq('id', user.id).single();
-            if (error && error.code !== 'PGRST116') console.error('Error fetching profile:', error);
-            return data;
-        };
-        
-        const ensureUserProfile = async (user) => {
-            let profile = await fetchUserProfile(user);
-            if (!profile) {
-                let username = user.email.split('@')[0];
-                const { error } = await _supabase.from('profiles').insert({ id: user.id, username, updated_at: new Date() });
-                if (error && error.code === '23505') {
-                    const newUsername = `${username}${Math.floor(Math.random() * 1000)}`;
-                    const { error: newError } = await _supabase.from('profiles').insert({ id: user.id, username: newUsername, updated_at: new Date() });
-                    if (newError) console.error("Error creating profile with random suffix:", newError);
-                } else if (error) console.error("Error creating profile:", error);
-                profile = await fetchUserProfile(user);
-            }
-            return profile;
-        };
+    function renderMessage(role, raw) {
+      const wrapper = document.createElement("div");
+      wrapper.className = role === "user" ? "flex justify-end" : "flex justify-start";
 
-        const updateUserProfileUI = (profile, user) => {
-            sidebarUsername.textContent = profile?.username || 'New User';
-            sidebarEmail.textContent = user.email;
-            sidebarAvatar.src = profile?.avatar_url || `https://placehold.co/40x40/2d2d2d/e0e0e0?text=${(profile?.username || user.email)[0].toUpperCase()}`;
-            document.getElementById('username').value = profile?.username || '';
-            document.getElementById('website').value = profile?.website || '';
-            document.getElementById('avatar_url').value = profile?.avatar_url || '';
-        };
-        
-        profileForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const updates = { id: currentUser.id, username: e.target.username.value, website: e.target.website.value, avatar_url: e.target.avatar_url.value, updated_at: new Date() };
-            const { error } = await _supabase.from('profiles').upsert(updates);
-            if (error) alert(`Error: ${error.message}`);
-            else { alert('Profile updated successfully!'); updateUserProfileUI(updates, currentUser); }
-        });
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + (role === "user"
+        ? "bg-indigo-600 text-white"
+        : "bg-gray-800 text-gray-100 border border-gray-700");
 
-        // === CHAT LOGIC ===
-        const renderChatList = () => {
-            chatList.innerHTML = '';
-            if (chats.length === 0) {
-                chatList.innerHTML = `<p class="text-center text-gray-400 text-sm">No chats yet.</p>`;
-                return;
-            }
-            chats.forEach(chat => {
-                const chatItem = document.createElement('div');
-                chatItem.className = `chat-item p-3 rounded-md cursor-pointer hover:bg-gray-600 truncate ${chat.id === activeChatId ? 'active' : ''}`;
-                chatItem.textContent = chat.title;
-                chatItem.dataset.chatId = chat.id;
-                chatItem.addEventListener('click', () => setActiveChat(chat.id));
-                chatList.appendChild(chatItem);
-            });
-        };
+      // Markdown -> safe HTML
+      const html = DOMPurify.sanitize(marked.parse(String(raw ?? "")));
+      bubble.innerHTML = html;
 
-        const fetchChats = async () => {
-            if (!currentUser) return;
-            const { data, error } = await _supabase.from('chats').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            if (error) console.error("Error fetching chats:", error);
-            else {
-                chats = data;
-                renderChatList();
-                if (!activeChatId && chats.length > 0) {
-                    setActiveChat(chats[0].id);
-                } else if (activeChatId && !chats.some(c => c.id === activeChatId)) {
-                     setActiveChat(chats.length > 0 ? chats[0].id : null);
-                } else if (chats.length === 0) {
-                    setActiveChat(null);
-                }
-            }
-        };
+      wrapper.appendChild(bubble);
+      chatEl.appendChild(wrapper);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
 
-        const setActiveChat = async (chatId) => {
-            activeChatId = chatId;
-            if (chatId) {
-                const currentChat = chats.find(c => c.id === chatId);
-                chatTitle.textContent = currentChat?.title || 'Chat';
-                messageInput.disabled = false;
-                messageForm.querySelector('button').disabled = false;
-                clearChatBtn.disabled = false;
-                await fetchMessages();
-            } else {
-                chatTitle.textContent = 'Select or create a chat';
-                chatMessages.innerHTML = '';
-                messageInput.disabled = true;
-                messageForm.querySelector('button').disabled = true;
-                clearChatBtn.disabled = true;
-            }
-            renderChatList();
-            closeSidebar();
-        };
+    function showTyping() {
+      const row = document.createElement("div");
+      row.id = "typing";
+      row.className = "flex justify-start";
+      const pill = document.createElement("div");
+      pill.className = "bubble bg-gray-800 border border-gray-700 text-gray-300";
+      pill.innerHTML = `<span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span>`;
+      row.appendChild(pill);
+      chatEl.appendChild(row);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+    function hideTyping() { document.getElementById("typing")?.remove(); }
 
-        newChatBtn.addEventListener('click', async () => {
-            const { data, error } = await _supabase.from('chats').insert({ user_id: currentUser.id }).select().single();
-            if (error) console.error("Error creating new chat:", error);
-            else {
-                chats.unshift(data);
-                setActiveChat(data.id);
-            }
-        });
-        
-        clearChatBtn.addEventListener('click', () => {
-            if (!activeChatId) return;
-            showConfirmModal('Clear Chat History', 'Are you sure you want to delete all messages in this chat?', async () => {
-                const { error } = await _supabase.from('messages').delete().eq('chat_id', activeChatId);
-                if (error) {
-                    console.error("Error clearing chat:", error);
-                } else {
-                    chatMessages.innerHTML = '';
-                    const { error: deleteChatError } = await _supabase.from('chats').delete().eq('id', activeChatId);
-                    if (deleteChatError) console.error("Error deleting chat:", deleteChatError);
-                    else await fetchChats();
-                }
-            });
-        });
+    newChatEl.addEventListener("click", () => {
+      conversation = [conversation[0]];
+      chatEl.innerHTML = "";
+    });
 
-        const addMessageToUI = (message) => {
-            const messageDiv = document.createElement('div');
-            const isUserMessage = message.role === 'user';
-            messageDiv.classList.add('message', 'p-3', 'rounded-lg', 'mb-4', 'max-w-xl');
-            if (isUserMessage) {
-                messageDiv.classList.add('own', 'ml-auto');
-                messageDiv.innerHTML = `<p class="text-sm">${message.content}</p>`;
-            } else {
-                messageDiv.innerHTML = `<div class="flex items-start gap-3"><img src="https://placehold.co/40x40/4a4a4a/e0e0e0?text=AI" class="w-8 h-8 rounded-full"><div><p class="font-semibold text-sm">AI Assistant</p><p class="text-sm mt-1">${message.content}</p></div></div>`;
-            }
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        };
-        
-        const showTypingIndicator = () => { /* Unchanged */ };
-        const removeTypingIndicator = () => { /* Unchanged */ };
+    formEl.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = inputEl.value.trim();
+      if (!text) return;
 
-        const fetchMessages = async () => {
-            if (!activeChatId) return;
-            const { data, error } = await _supabase.from('messages').select(`id, content, role`).eq('chat_id', activeChatId).order('created_at', { ascending: true });
-            if (error) console.error('Error fetching messages:', error);
-            else { chatMessages.innerHTML = ''; data.forEach(addMessageToUI); }
-        };
+      const userMsg = { role: "user", content: text };
+      conversation.push(userMsg);
+      renderMessage("user", text);
+      inputEl.value = "";
 
-        messageForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const content = messageInput.value.trim();
-            if (!content || !currentUser || !activeChatId) return;
-            const userMessageContent = content;
-            messageInput.value = '';
+      showTyping();
+      try {
+        const assistantMsg = await callOpenRouter(conversation);
+        hideTyping();
+        conversation.push(assistantMsg);
+        renderMessage("assistant", assistantMsg.content);
+      } catch (err) {
+        hideTyping();
+        renderMessage("assistant", "⚠️ Error contacting AI: " + (err?.message || err));
+      }
+    });
 
-            addMessageToUI({ content: userMessageContent, role: 'user' });
-            
-            _supabase.from('messages').insert({ content: userMessageContent, user_id: currentUser.id, role: 'user', chat_id: activeChatId }).then(({error}) => {
-                if (error) console.error("Error saving user message:", error);
-            });
-            
-            const currentChat = chats.find(c => c.id === activeChatId);
-            if (currentChat && currentChat.title === 'New Chat') {
-                const title = userMessageContent.substring(0, 30) + (userMessageContent.length > 30 ? '...' : '');
-                _supabase.from('chats').update({ title }).eq('id', activeChatId).then(({error}) => {
-                    if (!error) {
-                        currentChat.title = title;
-                        renderChatList();
-                        chatTitle.textContent = title;
-                    }
-                });
-            }
+    async function callOpenRouter(messages) {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          // optional routing headers:
+          "HTTP-Referer": location.origin,
+          "X-Title": "TejaGPT"
+        },
+        body: JSON.stringify({
+          model: OPENROUTER_MODEL,
+          messages
+        })
+      });
+      if (!res.ok) throw new Error(`OpenRouter ${res.status} ${res.statusText}`);
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content ?? "No response.";
+      return { role: "assistant", content };
+    }
 
-            showTypingIndicator();
+    /* ===============================
+       3D AUTH BACKGROUND (Three.js)
+       =============================== */
+    const authCanvas = document.getElementById("auth3d");
+    const aScene = new THREE.Scene();
+    const aCam   = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 1000);
+    const aRend  = new THREE.WebGLRenderer({ canvas: authCanvas, alpha: true, antialias: true });
+    aRend.setSize(innerWidth, innerHeight);
+    aRend.setPixelRatio(Math.min(devicePixelRatio, 2));
 
-            const { data: history } = await _supabase.from('messages').select('role, content').eq('chat_id', activeChatId).order('created_at', { ascending: false }).limit(10);
-            const apiMessages = (history || []).reverse().map(msg => ({ role: msg.role, content: msg.content }));
+    const group = new THREE.Group();
+    aScene.add(group);
 
-            try {
-                const response = await fetch(OPENROUTER_API_URL, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: "openai/gpt-oss-20b", messages: apiMessages })
-                });
-                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-                const data = await response.json();
-                const aiContent = data.choices[0].message.content;
+    // Wireframe icosahedron + floating particles
+    const ico = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(2.2, 1),
+      new THREE.MeshBasicMaterial({ color: 0x6366f1, wireframe: true })
+    );
+    group.add(ico);
 
-                removeTypingIndicator();
-                addMessageToUI({ content: aiContent, role: 'assistant' });
-                
-                _supabase.from('messages').insert({ content: aiContent, user_id: currentUser.id, role: 'assistant', chat_id: activeChatId });
-            } catch (err) {
-                console.error("OpenRouter API Error:", err);
-                removeTypingIndicator();
-                const errorMessage = "Sorry, I couldn't connect to the AI. Please check your API key.";
-                addMessageToUI({ content: errorMessage, role: 'assistant' });
-                _supabase.from('messages').insert({ content: errorMessage, user_id: currentUser.id, role: 'assistant', chat_id: activeChatId });
-            }
-        });
+    const partGeo = new THREE.BufferGeometry();
+    const count = 400;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) positions[i] = (Math.random() - .5) * 16;
+    partGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particles = new THREE.Points(partGeo, new THREE.PointsMaterial({ size: .035, color: 0x8b95ff }));
+    group.add(particles);
 
-        // === INITIALIZATION & AUTH STATE CHANGES ===
-        _supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session && session.user) {
-                currentUser = session.user;
-                showMainApp();
-                navigateTo('chat');
-                
-                const profile = await ensureUserProfile(currentUser);
-                updateUserProfileUI(profile, currentUser);
-                await fetchChats();
-            } else {
-                currentUser = null;
-                activeChatId = null;
-                chats = [];
-                showAuth();
-            }
-        });
-    </script>
+    aCam.position.z = 7;
+
+    function authAnimate() {
+      requestAnimationFrame(authAnimate);
+      group.rotation.x += 0.0015;
+      group.rotation.y += 0.002;
+      aRend.render(aScene, aCam);
+    }
+    authAnimate();
+
+    // Tilt the auth card slightly with the mouse
+    const card = document.getElementById("auth-card");
+    authScreen.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width  - .5;
+      const y = (e.clientY - rect.top)  / rect.height - .5;
+      card.style.transform = `rotateY(${x*10}deg) rotateX(${ -y*8 }deg) translateZ(0)`;
+    });
+    authScreen.addEventListener("mouseleave", () => card.style.transform = "rotateY(0) rotateX(0)");
+
+    // Resize handlers (both scenes)
+    addEventListener("resize", () => {
+      // chat/auth canvases share full screen
+      aCam.aspect = innerWidth/innerHeight;
+      aCam.updateProjectionMatrix();
+      aRend.setSize(innerWidth, innerHeight);
+    });
+  </script>
 </body>
 </html>
-
